@@ -37,6 +37,7 @@ build/Release
 /hat-clths-admin/node_modules/
 /hat-clths-client/build/
 /hat-clths-admin/build/
+/api/build/
 
 /hat-clths-client/coverage/
 /hat-clths-admin/coverage/
