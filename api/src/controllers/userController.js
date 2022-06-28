@@ -3,10 +3,24 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const factory = require("./handlerFactory");
 
-exports.getMe = (req, res, next) => {
-  req.params.id = req.user.id;
-  next();
-};
+exports.getMe = catchAsync(async (req, res, next) => {
+  if (!req.user.id) {
+    return next(new AppError("Nie można wykonać tej akcji", 404));
+  }
+
+  const me = await User.findById(req.user.id);
+
+  if (!me) {
+    return next(new AppError("Błąd pobierania danych", 404));
+  }
+
+  res.status(200).json({
+    status: 200,
+    data: {
+      data: me,
+    },
+  });
+});
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};

@@ -4,10 +4,38 @@ const factory = require("./handlerFactory");
 const Invoice = require("../models/invoiceModel");
 const Address = require("../models/addressModel");
 
-exports.createInvoice = factory.createOne(Invoice);
 exports.getInvoice = factory.getOne(Invoice);
 exports.updateInvoice = factory.updateOne(Invoice);
 exports.deleteInvoice = factory.deleteOne(Invoice);
+
+exports.createInvoice = catchAsync(async (req, res, next) => {
+  if (!req.body.address) {
+    return next(new AppError("Nie podano adresu", 404));
+  }
+
+  let address = await Address.findById(req.body.address);
+
+  if (!address) {
+    return next(new AppError("Podany adres nie istenieje"));
+  }
+
+  address = address.toObject();
+
+  if (address.user.id !== req.user.id) {
+    return next(new AppError("Podany adres jest nieprawidłowy"));
+  }
+
+  const invoice = await Invoice.create(req.body);
+
+  res.status(200).json({
+    status: 200,
+    data: {
+      data: {
+        invoice,
+      },
+    },
+  });
+});
 
 exports.getInvoices = catchAsync(async (req, res, next) => {
   const invoices = await Invoice.find({ address: req.params.address });
@@ -22,27 +50,4 @@ exports.getInvoices = catchAsync(async (req, res, next) => {
       data: invoices,
     },
   });
-});
-
-exports.fillAddress = catchAsync(async (req, res, next) => {
-  if (!req.params.address && !req.body.address) {
-    return next(new AppError("Nie podano adresu", 404));
-  }
-
-  let addressId;
-
-  if (req.params.address) {
-    addressId = req.params.address;
-    req.body.address = req.params.address;
-  } else {
-    addressId = req.body.address;
-  }
-
-  const address = await Address.findById(addressId);
-
-  if (!address) {
-    return next(new AppError("Podano nieprawidłowy adres do faktury", 404));
-  }
-
-  next();
 });

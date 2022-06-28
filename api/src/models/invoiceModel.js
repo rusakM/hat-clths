@@ -10,6 +10,7 @@ const invoiceSchema = new mongoose.Schema(
     nip: {
       type: String,
       required: [true, "Nie podano numeru NIP"],
+      length: [9, "Nieprawidłowa długość numeru NIP"],
     },
     company: {
       type: String,

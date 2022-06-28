@@ -92,9 +92,9 @@ addressSchema.virtual("invoice", {
 addressSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
-    select: "-__v -role -photo",
+    select: "-__v -role -photo -active",
   });
-  if (this.invoice.length > 0) {
+  if (this.invoice && this.invoice.length > 0) {
     this.populate({ path: "invoice", select: "-v -address -user" });
   }
   next();

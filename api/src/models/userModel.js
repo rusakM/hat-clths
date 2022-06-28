@@ -58,6 +58,12 @@ userSchema.virtual("address", {
   localField: "_id",
 });
 
+userSchema.virtual("invoice", {
+  ref: "Invoice",
+  foreignField: "user",
+  localField: "_id",
+});
+
 // this method will run before saving document in dbs
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
@@ -74,10 +80,15 @@ userSchema.pre("save", async function (next) {
 });
 
 // this method will run before searching in dbs, to filter out unactive users
-// userSchema.pre(/^find/, function (next) {
-//   this.model.find({ active: { $ne: false } });
-//   next();
-// });
+userSchema.pre(/^find/, function (next) {
+  this.model.find({ active: { $ne: false } });
+
+  if (this.invoice && this.invoice.length) {
+    this.populate({ path: "invoice", select: "nip company address" });
+  }
+
+  next();
+});
 
 // this method will save timestamp for changing password
 userSchema.pre("save", function (next) {

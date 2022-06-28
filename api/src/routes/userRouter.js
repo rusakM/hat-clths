@@ -2,6 +2,7 @@ const express = require("express");
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 const addressRouter = require("./addressRouter");
+const invoiceRouter = require("./invoiceRouter");
 
 const router = express.Router();
 
@@ -23,11 +24,13 @@ router.patch("/updateMyPassword", authController.updatePassword);
 
 router
   .route("/me")
-  .get(userController.getMe, userController.getUser)
+  .get(authController.signUser, userController.getMe)
   .patch(userController.updateMe)
   .delete(userController.deleteMe);
 
 router.use("/addresses", addressRouter);
+
+router.use("/invoices", invoiceRouter);
 
 router.use(authController.restrictTo("admin", "kucharz"));
 

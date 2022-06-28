@@ -1,16 +1,19 @@
 const express = require("express");
 const invoiceController = require("../controllers/invoiceControler");
+const authController = require("../controllers/authController");
 
 const router = express.Router();
+
+router.use(authController.signUser);
 
 router
   .route("/")
   .get(invoiceController.getInvoices)
-  .post(invoiceController.fillAddress, invoiceController.createInvoice);
+  .post(invoiceController.createInvoice);
 
 router
   .route("/:id")
-  .get(invoiceController.fillAddress, invoiceController.getInvoice)
+  .get(invoiceController.getInvoice)
   .patch(invoiceController.updateInvoice)
   .delete(invoiceController.deleteInvoice);
 
