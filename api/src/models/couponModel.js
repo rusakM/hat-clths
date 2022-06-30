@@ -9,7 +9,12 @@ const couponSchema = new mongoose.Schema(
     },
     couponCode: {
       type: String,
-      required: [true, "Nie przypisano numeru kuponu"],
+    },
+    discount: {
+      type: Number,
+      min: 1,
+      max: 100,
+      default: 5,
     },
     createdAt: Date,
     expires: Date,
@@ -24,25 +29,32 @@ const couponSchema = new mongoose.Schema(
   }
 );
 
+couponSchema.index({ user: 1 });
+
 couponSchema.pre("save", function (next) {
   if (this.isNew) {
     const time = Date.now();
 
-    const userId = this.user;
+    const userId = this.user.toString();
     this.couponCode = `${userId.slice(
       userId.length - 6,
       userId.length
     )}-${`${time}`.slice(`${time}`.length - 6, `${time}`.length)}`;
     this.createdAt = new Date(time);
-    this.expires = new Date(this.expires.getTime() + time);
+    this.expires = new Date(time + this.expires.getTime());
   }
   next();
 });
 
 couponSchema.pre(/^find/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
+
   this.populate({
     path: "user",
     select: "name surname email role isGoogleUser",
+    options: { _recursed: true },
   });
 
   next();

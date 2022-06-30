@@ -72,6 +72,10 @@ const addressSchema = new mongoose.Schema(
       },
     },
     isDefault: Boolean,
+    active: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     toJSON: {
@@ -90,13 +94,19 @@ addressSchema.virtual("invoice", {
 });
 
 addressSchema.pre(/^find/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
   this.populate({
     path: "user",
     select: "-__v -role -photo -active",
+    options: { _recursed: true },
+  }).populate({
+    path: "invoice",
+    select: "-__v -user",
+    options: { _recursed: true },
   });
-  if (this.invoice && this.invoice.length > 0) {
-    this.populate({ path: "invoice", select: "-v -address -user" });
-  }
+
   next();
 });
 

@@ -27,15 +27,20 @@ const invoiceSchema = new mongoose.Schema(
   }
 );
 
+invoiceSchema.index({ user: 1, address: 1 });
+
 invoiceSchema.pre(/^find/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
   this.populate({
     path: "user",
     select: "name surname email role isGoogleUser",
-  });
-
-  this.populate({
+    options: { _recursed: true },
+  }).populate({
     path: "address",
-    select: "-__v",
+    select: "-__v -user",
+    options: { _recursed: true },
   });
 
   next();

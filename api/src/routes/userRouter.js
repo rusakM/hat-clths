@@ -3,6 +3,7 @@ const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 const addressRouter = require("./addressRouter");
 const invoiceRouter = require("./invoiceRouter");
+const couponRouter = require("./couponRouter");
 
 const router = express.Router();
 
@@ -32,7 +33,9 @@ router.use("/addresses", addressRouter);
 
 router.use("/invoices", invoiceRouter);
 
-router.use(authController.restrictTo("admin", "kucharz"));
+router.use("/coupons", couponRouter);
+
+router.use(authController.restrictTo("admin"));
 
 // for admin
 

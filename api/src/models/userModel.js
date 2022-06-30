@@ -52,16 +52,25 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.virtual("address", {
+userSchema.virtual("addresses", {
   ref: "Address",
   foreignField: "user",
   localField: "_id",
+  match: { active: true },
 });
 
 userSchema.virtual("invoice", {
   ref: "Invoice",
   foreignField: "user",
   localField: "_id",
+  match: { active: true },
+});
+
+userSchema.virtual("coupons", {
+  ref: "Coupon",
+  foreignField: "user",
+  localField: "_id",
+  match: { isUsed: false },
 });
 
 // this method will run before saving document in dbs
@@ -81,11 +90,22 @@ userSchema.pre("save", async function (next) {
 
 // this method will run before searching in dbs, to filter out unactive users
 userSchema.pre(/^find/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
   this.model.find({ active: { $ne: false } });
 
-  if (this.invoice && this.invoice.length) {
-    this.populate({ path: "invoice", select: "nip company address" });
-  }
+  this.populate({ path: "invoice", select: "nip company address" })
+    .populate({
+      path: "addresses",
+      select: "-__v -invoice",
+      options: { _recursed: true },
+    })
+    .populate({
+      path: "coupons",
+      select: "coupon createdAt expires isUsed",
+      options: { _recursed: true },
+    });
 
   next();
 });
