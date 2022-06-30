@@ -6,11 +6,42 @@ const categorySchema = new mongoose.Schema({
     required: [true, "Nie podano nazwy kategorii"],
   },
   description: String,
-  picture: String,
-  gender: {
+  picture: {
     type: String,
-    enum: ["kobieta", "mężczyzna"],
+    default: "default.png",
   },
+  gender: {
+    //false - woman, true - man
+    type: Boolean,
+    default: false,
+  },
+  isDeactivated: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+// categorySchema.virtual("products", {
+//   ref: "ProductPreview",
+//   localField: "_id",
+//   foreignField: "category",
+// });
+
+categorySchema.pre("find", function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
+  this.model.find({ isDeactivated: { $eq: false } });
+
+  return next();
+});
+
+categorySchema.pre(/^findOne/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
+
+  return next();
 });
 
 export default mongoose.model("Category", categorySchema);

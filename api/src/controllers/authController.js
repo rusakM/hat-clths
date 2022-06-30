@@ -136,6 +136,38 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+exports.tryProtect = catchAsync(async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  const currentUser = await User.findById(decoded.id);
+
+  if (!currentUser) {
+    return next();
+  }
+
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next();
+  }
+
+  req.user = currentUser;
+  res.locals.user = currentUser;
+  next();
+});
+
 exports.signUser = (req, res, next) => {
   if (!req.user._id) {
     return next(new AppError("Nie można wykonać tej akcji", 404));
