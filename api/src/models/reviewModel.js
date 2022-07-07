@@ -37,9 +37,14 @@ reviewSchema.pre("save", function (next) {
 });
 
 reviewSchema.pre(/^find/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
+
   this.populate({
     path: "user",
-    select: "_id name surname email",
+    select: "-__v",
+    options: { _recursed: true },
   });
 
   next();

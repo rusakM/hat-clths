@@ -12,6 +12,8 @@ const cors = require("cors");
 
 const errorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRouter");
+const categoryRouter = require("./routes/categoryRouter");
+const productPreviewRouter = require("./routes/productPreviewRouter");
 
 const app = express();
 
@@ -92,5 +94,7 @@ app.get("/", (req, res, next) => {
 app.use(errorHandler);
 
 app.use("/api/users", userRouter);
+app.use("/api/categories", categoryRouter);
+app.use("/api/products", productPreviewRouter);
 
 module.exports = app;

@@ -8,7 +8,19 @@ const router = express.Router();
 
 router.get("/", categoryController.getCategories);
 
-router.get("/:name", authController.tryProtect, categoryController.getCategory);
+router.get(
+  "/:slug",
+  authController.tryProtect,
+  categoryController.incrementCategoryShow,
+  categoryController.getCategory
+);
+
+router.get(
+  "/:slug/products",
+  authController.tryProtect,
+  categoryController.incrementCategoryShow,
+  categoryController.getCategoryProducts
+);
 
 //for admin
 
@@ -16,10 +28,16 @@ router.use(authController.protect, authController.restrictTo("admin"));
 
 router.post(
   "/",
-  categoryController.convertExpirationDaysToTime,
-  categoryController.createCoupon
+  categoryController.uploadPhoto,
+  categoryController.resizePhoto,
+  categoryController.createCategory
 );
 
-router.patch("/:id", categoryController.updateCategory);
+router.patch(
+  "/:id",
+  categoryController.uploadPhoto,
+  categoryController.resizePhoto,
+  categoryController.updateCategory
+);
 
 module.exports = router;

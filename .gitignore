@@ -38,6 +38,9 @@ build/Release
 /hat-clths-client/build/
 /hat-clths-admin/build/
 /api/build/
+/node_modules/
+package-lock.json
+package.json
 
 /hat-clths-client/coverage/
 /hat-clths-admin/coverage/

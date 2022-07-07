@@ -27,4 +27,4 @@ categoryShowSchema.pre("save", function (next) {
   next();
 });
 
-export default mongoose.model("CategoryShow", categoryShowSchema);
+module.exports = mongoose.model("CategoryShow", categoryShowSchema);

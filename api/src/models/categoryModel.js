@@ -1,31 +1,46 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
-const categorySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Nie podano nazwy kategorii"],
+const categorySchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Nie podano nazwy kategorii"],
+    },
+    description: String,
+    picture: {
+      type: String,
+      default: "default.png",
+    },
+    gender: {
+      //false - woman, true - man
+      type: Boolean,
+      default: false,
+    },
+    isDeactivated: {
+      type: Boolean,
+      default: false,
+    },
+    slug: String,
   },
-  description: String,
-  picture: {
-    type: String,
-    default: "default.png",
-  },
-  gender: {
-    //false - woman, true - man
-    type: Boolean,
-    default: false,
-  },
-  isDeactivated: {
-    type: Boolean,
-    default: false,
-  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+categorySchema.virtual("products", {
+  ref: "ProductPreview",
+  localField: "_id",
+  foreignField: "category",
 });
 
-// categorySchema.virtual("products", {
-//   ref: "ProductPreview",
-//   localField: "_id",
-//   foreignField: "category",
-// });
+categorySchema.pre("save", function (next) {
+  this.slug = slugify(`${this.name}-${this.gender ? "d" : "m"}`, {
+    lower: true,
+  });
+  next();
+});
 
 categorySchema.pre("find", function (next) {
   if (this.options._recursed) {
@@ -44,4 +59,4 @@ categorySchema.pre(/^findOne/, function (next) {
   return next();
 });
 
-export default mongoose.model("Category", categorySchema);
+module.exports = mongoose.model("Category", categorySchema);

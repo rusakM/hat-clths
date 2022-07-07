@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const productPreviewSchema = new mongoose.Schema<IProductPreview>(
+const productPreviewSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -46,58 +46,59 @@ productPreviewSchema.index({ category: 1 });
 
 productPreviewSchema.virtual("products", {
   ref: "Product",
-  foreignField: "productPreview",
   localField: "_id",
-})
+  foreignField: "productPreview",
+});
 
 productPreviewSchema.virtual("reviews", {
   ref: "Review",
-  foreignField: "productPreview",
   localField: "_id",
+  foreignField: "productPreview",
 });
 
-productPreviewSchema
-  .virtual("ratingsAverage")
-  .get(function (this) {
-    if (this.reviews && this.reviews.length > 0) {
-      const reviewsRatings = this.reviews
-        .map(({ rating }) => rating)
-        .reduce((total, val) => total + val);
+// productPreviewSchema
+//   .virtual("ratingsAverage")
+//   .get(function (this) {
+//     if (this.reviews && this.reviews.length > 0) {
+//       const reviewsRatings = this.reviews
+//         .map(({ rating }) => rating)
+//         .reduce((total, val) => total + val);
 
-      this.ratingsAverage = reviewsRatings / this.reviews.length;
-    } else {
-      this.ratingsAverage = 0;
-    }
-  });
+//       this.ratingsAverage = reviewsRatings / this.reviews.length;
+//     } else {
+//       this.ratingsAverage = 0;
+//     }
+//   });
 
 productPreviewSchema.pre(/^find/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
   this.populate({
     path: "products",
-    select: "productName size isAvailable barcode",
-  }).populate({
+    select: "-__v",
+    options: { _recursed: true },
+  });
+  this.populate({
     path: "category",
     select: "-__v",
+    options: { _recursed: true },
   });
 
   next();
 });
 
-productPreviewSchema.pre(/^findOne/, function(next) {
+productPreviewSchema.pre(/^findOne/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
   this.populate({
-    path: "products",
-    select: "productName size isAvailable barcode",
-  }).populate({
-    path: "category",
-    select: "-__v",
-  }).populate({
     path: "reviews",
-    select: "-__v -productPreview"
+    select: "-__v",
+    options: { _recursed: true },
   });
 
   next();
-} )
+});
 
-module.exports = mongoose.model(
-  "ProductPreview",
-  productPreviewSchema
-);
+module.exports = mongoose.model("ProductPreview", productPreviewSchema);

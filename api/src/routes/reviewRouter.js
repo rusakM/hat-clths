@@ -4,24 +4,20 @@ const authControler = require("../controllers/authController");
 
 const router = express.Router();
 
-router.route("/").get(reviewController.getReviews);
+router.get("/", reviewController.readProductId, reviewController.getReviews);
 
-router
-  .route("/:id")
-  .get(reviewController.fillProduct, reviewController.getReview);
-
-router.use(authControler.protect);
+router.use(authControler.protect, authControler.signUser);
 
 router.post(
   "/",
-  authControler.signUser,
+  reviewController.readProductId,
   reviewController.fillProduct,
   reviewController.createReview
 );
 
 router
-  .route("/:id")
-  .patch(reviewController.fillProduct, reviewController.updateReview)
-  .delete(reviewController.deleteReview);
+  .route("/:review")
+  .patch(reviewController.readProductId, reviewController.updateReview)
+  .delete(reviewController.readProductId, reviewController.deleteReview);
 
 module.exports = router;
