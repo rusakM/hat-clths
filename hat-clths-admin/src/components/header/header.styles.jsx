@@ -6,6 +6,8 @@ export const HeaderContainer = styled.div`
   height: 100px;
   display: flex;
   justify-content: space-between;
+  position: absolute;
+  background-color: #fff;
 `;
 
 export const LogoContainer = styled.div`
@@ -35,4 +37,5 @@ export const OptionsContainer = styled.div`
 export const OptionsLink = styled(Link)`
   padding: 10px 15px;
   cursor: pointer;
+  font-size: 1.1em;
 `;
