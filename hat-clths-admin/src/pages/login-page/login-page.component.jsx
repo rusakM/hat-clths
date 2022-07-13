@@ -1,6 +1,12 @@
 import React, { useState } from "react";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
+
 import FormInput from "../../components/form-input/form-input.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
+
+import { signInStart } from "../../redux/user/user.actions";
+import { selectLoginError } from "../../redux/user/user.selectors";
 
 import {
   LoginPageContainer,
@@ -8,13 +14,18 @@ import {
   LoginPageForm,
 } from "./login-page.styles";
 
-const LoginPage = () => {
+const LoginPage = ({ signInStart, loginError }) => {
   const [userCredentials, setCredentials] = useState({
     email: "",
     password: "",
   });
 
   const { email, password } = userCredentials;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    signInStart(email, password);
+  };
 
   const handleChange = (e) => {
     const { value, name } = e.target;
@@ -27,7 +38,7 @@ const LoginPage = () => {
   return (
     <LoginPageContainer>
       <LoginPageHeader>Logowanie do panelu</LoginPageHeader>
-      <LoginPageForm>
+      <LoginPageForm onSubmit={handleSubmit}>
         <FormInput
           name="email"
           type="email"
@@ -50,4 +61,12 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+const mapDispatchToProps = (dispatch) => ({
+  signInStart: (email, password) => dispatch(signInStart({ email, password })),
+});
+
+const mapStateToProps = createStructuredSelector({
+  loginError: selectLoginError,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);
