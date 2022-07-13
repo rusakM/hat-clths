@@ -80,7 +80,9 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
   }
 
   if (user.role === "użytkownik") {
-    return next(new AppError("Użytkownik nie ma dostępu do tej aplikacji"));
+    return next(
+      new AppError("Użytkownik nie ma dostępu do tej aplikacji", 403)
+    );
   }
   createSendToken(user, 200, req, res);
 });
