@@ -1,12 +1,16 @@
 import React, { useState } from "react";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import CustomButton from "../custom-button/custom-button.component";
 import {
   CategoriesListContainer,
   CategoriesListHeader,
   CategoriesListItems,
   CategoriesListItem,
 } from "./categories-list.styles";
+import { selectCategories } from "../../redux/category/category.selectors";
 
 const CategoriesList = ({ categories }) => {
   const [visibilityLists, changeVisibilityLists] = useState({
@@ -28,6 +32,9 @@ const CategoriesList = ({ categories }) => {
 
   return (
     <CategoriesListContainer>
+      <div className="centered-div">
+        <CustomButton>Dodaj kategorię</CustomButton>
+      </div>
       <CategoriesListHeader
         name="forHer"
         onClick={() => visibilityChange("forHer")}
@@ -66,4 +73,8 @@ const CategoriesList = ({ categories }) => {
   );
 };
 
-export default CategoriesList;
+const mapStateToProps = createStructuredSelector({
+  categories: selectCategories,
+});
+
+export default connect(mapStateToProps)(CategoriesList);

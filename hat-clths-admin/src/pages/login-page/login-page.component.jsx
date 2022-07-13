@@ -12,6 +12,7 @@ import {
   LoginPageContainer,
   LoginPageHeader,
   LoginPageForm,
+  LoginPageWarn,
 } from "./login-page.styles";
 
 const LoginPage = ({ signInStart, loginError }) => {
@@ -55,6 +56,9 @@ const LoginPage = ({ signInStart, loginError }) => {
           label="hasło"
           required
         />
+        {loginError && loginError.code && (
+          <LoginPageWarn>{loginError.message}</LoginPageWarn>
+        )}
         <CustomButton type="submit">Zaloguj</CustomButton>
       </LoginPageForm>
     </LoginPageContainer>

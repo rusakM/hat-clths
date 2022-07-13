@@ -1,31 +1,28 @@
-import React from "react";
-import axios from "axios";
-import CategoriesList from "../../components/categories-list/categories-list.component";
+import React, { useEffect, lazy, Suspense } from "react";
+import { connect } from "react-redux";
+import { fetchCategoriesStart } from "../../redux/category/category.actions";
+import Spinner from "../../components/spinner/spinner.component";
 import { ProductsPageContainer } from "./products-page.styles";
 
-const ProductsPage = () => {
-  const categories = [
-    {
-      name: "Spodnie damskie",
-      slug: "spodnie-damskie",
-      gender: false,
-    },
-    {
-      name: "Spodnie męskie",
-      slug: "spodnie-meskie",
-      gender: true,
-    },
-    {
-      name: "Kapelusze",
-      slug: "kapelusze",
-      gender: true,
-    },
-  ];
+const CategoriesList = lazy(() =>
+  import("../../components/categories-list/categories-list.component")
+);
+
+const ProductsPage = ({ fetchCategoriesStart }) => {
+  useEffect(() => {
+    fetchCategoriesStart();
+  }, [fetchCategoriesStart]);
   return (
     <ProductsPageContainer>
-      <CategoriesList categories={categories} />
+      <Suspense fallback={<Spinner />}>
+        <CategoriesList />
+      </Suspense>
     </ProductsPageContainer>
   );
 };
 
-export default ProductsPage;
+const mapDispatchToProps = (dispatch) => ({
+  fetchCategoriesStart: () => dispatch(fetchCategoriesStart()),
+});
+
+export default connect(null, mapDispatchToProps)(ProductsPage);

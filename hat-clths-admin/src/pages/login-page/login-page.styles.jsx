@@ -19,3 +19,7 @@ export const LoginPageForm = styled.form`
   display: flex;
   flex-direction: column;
 `;
+
+export const LoginPageWarn = styled.p`
+  color: #ff0000;
+`;

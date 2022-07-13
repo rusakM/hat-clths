@@ -13,12 +13,7 @@ export const getData = async (url) => {
   }
 };
 
-// export function AppError(message, code) {
-//   this.message = message;
-//   this.code = code;
-// }
-
-export const AppError = (message, code) => ({
-  message,
-  code,
-});
+export function AppError(message, code) {
+  this.message = message;
+  this.code = code;
+}
