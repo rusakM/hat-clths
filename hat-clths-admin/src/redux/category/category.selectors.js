@@ -1,6 +1,5 @@
 import { createSelector } from "reselect";
 import memoize from "lodash.memoize";
-import { categorySagas } from "./category.sagas";
 
 const selectCategory = (state) => state.categories;
 
@@ -9,15 +8,15 @@ export const selectCategories = createSelector(
   (categories) => categories.categories
 );
 
-export const selectCategoryByName = memoize((collectionName) =>
+export const selectCategoryByName = memoize((categoryName) =>
   createSelector([selectCategories], (categories) =>
-    categories.find((cat) => cat.name === collectionName)
+    categories.find((cat) => cat.name === categoryName)
   )
 );
 
-export const selectCategoryById = memoize((collectionId) =>
+export const selectCategoryById = memoize((categoryId) =>
   createSelector([selectCategories], (categories) =>
-    categories.find((cat) => cat.id === collectionId)
+    categories.find((cat) => cat.id === categoryId)
   )
 );
 
