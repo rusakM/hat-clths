@@ -7,6 +7,13 @@ const reviewController = require("../controllers/reviewController");
 const router = express.Router();
 
 router.get(
+  "/new",
+  authController.tryProtect,
+  productPreviewController.limitNewProducts,
+  productPreviewController.getProducts
+);
+
+router.get(
   "/:id",
   authController.tryProtect,
   productPreviewController.showProduct,

@@ -12,6 +12,11 @@ exports.getProduct = factory.getOne(ProductPreview);
 
 exports.getProducts = factory.getAll(ProductPreview);
 
+exports.limitNewProducts = (req, res, next) => {
+  req.query.limit = 25;
+  next();
+};
+
 exports.createProduct = catchAsync(async (req, res, next) => {
   const productPreview = await ProductPreview.create(req.body);
 
