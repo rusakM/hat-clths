@@ -1,7 +1,7 @@
 import { takeLatest, call, all, put } from "redux-saga/effects";
 import CategoryActionTypes from "./category.types";
 
-import { getCategories } from "../../api/category.functions";
+import { getDocuments } from "../../api/category.functions";
 
 import {
   fetchCategoriesSuccess,
@@ -10,7 +10,7 @@ import {
 
 export function* fetchCategoriesStart() {
   try {
-    const categories = yield getCategories();
+    const categories = yield getDocuments();
     yield put(fetchCategoriesSuccess(categories));
   } catch (error) {
     yield put(fetchCategoriesFailure(error));

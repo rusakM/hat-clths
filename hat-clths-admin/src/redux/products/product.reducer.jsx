@@ -4,16 +4,16 @@ const INITIAL_STATE = {
   products: {},
   isFetching: false,
   error: undefined,
-  fetchingCategory: null,
+  product: {},
 };
 
 const productReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case ProductActionTypes.FETCH_PRODUCTS_START:
+    case ProductActionTypes.FETCH_ONE_PRODUCT_START:
       return {
         ...state,
         isFetching: true,
-        fetchingCategory: action.payload,
       };
     case ProductActionTypes.FETCH_PRODUCTS_SUCCESS:
       const products = state.products;
@@ -22,12 +22,16 @@ const productReducer = (state = INITIAL_STATE, action) => {
         ...state,
         isFetching: false,
         products,
-        fetchingCategory: null,
+      };
+    case ProductActionTypes.FETCH_ONE_PRODUCT_SUCCESS:
+      return {
+        ...state,
+        product: action.payload,
       };
     case ProductActionTypes.FETCH_PRODUCTS_FAILURE:
+    case ProductActionTypes.FETCH_ONE_PRODUCT_FAILURE:
       return {
         isFetching: false,
-        fetchingCategory: null,
         error: action.payload,
       };
     default:
