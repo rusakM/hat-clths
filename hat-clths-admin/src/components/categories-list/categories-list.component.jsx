@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,8 +12,9 @@ import {
   CategoriesListItem,
 } from "./categories-list.styles";
 import { selectCategories } from "../../redux/category/category.selectors";
+import { toggleEditorVisibility } from "../../redux/category/category.actions";
 
-const CategoriesList = ({ categories }) => {
+const CategoriesList = ({ categories, toggleEditorVisibility }) => {
   const [visibilityLists, changeVisibilityLists] = useState({
     forHim: false,
     forHer: false,
@@ -33,8 +35,14 @@ const CategoriesList = ({ categories }) => {
   return (
     <CategoriesListContainer>
       <div className="centered-div">
-        <CustomButton>Dodaj kategorię</CustomButton>
+        <CustomButton onClick={toggleEditorVisibility}>
+          Dodaj kategorię
+        </CustomButton>
       </div>
+      <Link to="/products">
+        <CategoriesListHeader>Nowości</CategoriesListHeader>
+      </Link>
+
       <CategoriesListHeader
         name="forHer"
         onClick={() => visibilityChange("forHer")}
@@ -77,4 +85,8 @@ const mapStateToProps = createStructuredSelector({
   categories: selectCategories,
 });
 
-export default connect(mapStateToProps)(CategoriesList);
+const mapDispatchToProps = (dispatch) => ({
+  toggleEditorVisibility: () => dispatch(toggleEditorVisibility()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(CategoriesList);

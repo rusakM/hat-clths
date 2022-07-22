@@ -29,3 +29,7 @@ export const fetchOneProductFailure = (error) => ({
   type: ProductActionTypes.FETCH_ONE_PRODUCT_FAILURE,
   payload: error,
 });
+
+export const clearProductData = () => ({
+  type: ProductActionTypes.CLEAR_PRODUCT_DATA,
+});

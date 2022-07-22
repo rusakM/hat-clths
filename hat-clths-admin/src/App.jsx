@@ -18,6 +18,10 @@ const ProductsPage = lazy(() =>
   import("./pages/products-page/products-page.component")
 );
 
+const ProductPage = lazy(() =>
+  import("./pages/product-page/product-page.component")
+);
+
 const App = () => {
   const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
@@ -33,8 +37,15 @@ const App = () => {
       <RootContainer>
         <Suspense fallback={<Spinner />}>
           <Routes>
-            <Route exact element={<MainPage />} path="/"></Route>
-            <Route path="/products" element={<ProductsPage />}></Route>
+            <Route exact element={<MainPage />} path="/" />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/newProduct" element={<ProductPage />} />
+            <Route path="/products/:id" element={<ProductsPage />} />
+            <Route path="/products/:category/new" element={<ProductPage />} />
+            <Route
+              path="/products/:category/:productId"
+              element={<ProductPage />}
+            />
             <Route
               path="/login"
               exact

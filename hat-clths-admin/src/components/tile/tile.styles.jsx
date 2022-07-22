@@ -2,15 +2,15 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 
 export const TileContainer = (width) => styled(Link)`
-  width: ${width};
+  width: ${width}px;
   display: flex;
   flex-direction: column;
   margin: 10px;
 `;
 
 export const IconContainer = (width) => styled.div`
-  width: ${width};
-  height: ${width};
+  width: ${width}px;
+  height: ${width}px;
   border: 1px solid #000;
   display: flex;
   align-items: center;
@@ -20,9 +20,13 @@ export const IconContainer = (width) => styled.div`
     border: 2px solid #000;
   }
 
-  & > img {
-    width: 100%;
-    height: 100%;
+  & > div {
+    height: ${width - 6}px;
+    width: ${width - 4}px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden;
     margin: 1px;
   }
 

@@ -1,4 +1,6 @@
-body {
+body,
+input,
+textarea {
   font-family: "Open Sans Condensed";
 }
 

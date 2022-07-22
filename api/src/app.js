@@ -36,8 +36,8 @@ app.options(
 );
 
 //serving static files
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+console.log(process.cwd());
 //development logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));

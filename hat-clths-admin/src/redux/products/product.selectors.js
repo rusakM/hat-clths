@@ -3,20 +3,14 @@ import memoize from "lodash.memoize";
 
 const selectProduct = (state) => state.products;
 
-export const selectProducts = createSelector(
-  [selectProduct],
-  (products) => products.products
+export const selectProducts = createSelector([selectProduct], (products) =>
+  products.products ? products.products : []
 );
 
 export const selectProductsByCategory = memoize((categoryName) =>
-  createSelector([selectProducts], (products) => products[categoryName])
-);
-
-export const selectProductsByCategoryAndId = memoize(
-  (categoryName, productId) =>
-    createSelector([() => selectProductsByCategory(categoryName)], (products) =>
-      products.find((product) => product.id === productId)
-    )
+  createSelector([selectProducts], (products) =>
+    products ? products[categoryName] : []
+  )
 );
 
 export const selectIsProductFetching = createSelector(
@@ -27,4 +21,8 @@ export const selectIsProductFetching = createSelector(
 export const selectProductsError = createSelector(
   [selectProduct],
   (products) => products.error
+);
+
+export const selectOneProduct = createSelector([selectProduct], (products) =>
+  products ? products.product : {}
 );
