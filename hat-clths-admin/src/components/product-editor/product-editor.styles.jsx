@@ -84,12 +84,7 @@ export const SizesContainer = styled.div`
   padding: 1em;
   display: flex;
   flex-direction: row;
-`;
-
-export const SizesList = styled.div`
-  width: 30%;
-  display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
 `;
 
 export const DescriptionContainer = styled.div`

@@ -33,3 +33,33 @@ export const fetchOneProductFailure = (error) => ({
 export const clearProductData = () => ({
   type: ProductActionTypes.CLEAR_PRODUCT_DATA,
 });
+
+export const createProductStart = (productData, id) => ({
+  type: ProductActionTypes.CREATE_PRODUCT_START,
+  payload: productData,
+});
+
+export const createProductSuccess = (productData) => ({
+  type: ProductActionTypes.CREATE_PRODUCT_SUCCESS,
+  payload: productData,
+});
+
+export const createProductFailure = (error) => ({
+  type: ProductActionTypes.CREATE_PRODUCT_FAILURE,
+  payload: error,
+});
+
+export const updateProductStart = (productData, id) => ({
+  type: ProductActionTypes.UPDATE_PRODUCT_START,
+  payload: { form: productData, id },
+});
+
+export const updateProductSuccess = (productData) => ({
+  type: ProductActionTypes.UPDATE_PRODUCT_SUCCESS,
+  payload: productData,
+});
+
+export const updateProductFailure = (error) => ({
+  type: ProductActionTypes.UPDATE_PRODUCT_FAILURE,
+  payload: error,
+});

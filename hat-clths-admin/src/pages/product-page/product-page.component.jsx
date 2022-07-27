@@ -21,7 +21,7 @@ const ProductPage = ({ fetchCategoriesStart, fetchOneProductStart }) => {
 
   return (
     <Suspense fallback={<Spinner />}>
-      <ProductEditor />
+      <ProductEditor isNew={!productId} />
     </Suspense>
   );
 };

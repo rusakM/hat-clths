@@ -38,18 +38,21 @@ const ProductsList = ({ category }) => {
 
   return (
     <ProductsListContainer>
-      <ProductsListRow>
-        {cat && (
-          <ProductsListCategoryName>
-            {cat.name}
-            <span onClick={toggleEditor}>
-              <FontAwesomeIcon icon={faPen} />
-            </span>
-          </ProductsListCategoryName>
-        )}
-        <Link to={cat ? `/products/${cat.slug}/new` : "/products/newProduct"}>
-          <CustomButton>Dodaj produkt</CustomButton>
-        </Link>
+      <ProductsListRow className="space-between">
+        <div className="row">
+          {cat && (
+            <ProductsListCategoryName>
+              {cat.name}
+              <span onClick={toggleEditor}>
+                <FontAwesomeIcon icon={faPen} />
+              </span>
+            </ProductsListCategoryName>
+          )}
+          <Link to={cat ? `/products/${cat.slug}/new` : "/products/newProduct"}>
+            <CustomButton>Dodaj produkt</CustomButton>
+          </Link>
+        </div>
+        <p>Znaleziono produktów: {products ? products.length : 0}</p>
       </ProductsListRow>
       {products &&
         mappedProducts.map((productsRow, num) => (

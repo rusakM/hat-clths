@@ -2,13 +2,22 @@ import { takeLatest, call, all, put } from "redux-saga/effects";
 import ProductActionTypes from "./product.types";
 
 import { getDocuments } from "../../api/category.functions";
-import { getNewProducts, getProduct } from "../../api/product.functions";
+import {
+  getNewProducts,
+  getProduct,
+  createNewProduct,
+  updateProduct,
+} from "../../api/product.functions";
 
 import {
   fetchProductsSuccess,
   fetchProductsFailure,
   fetchOneProductSuccess,
   fetchOneProductFailure,
+  createProductFailure,
+  updateProductFailure,
+  createProductSuccess,
+  updateProductSuccess,
 } from "./product.actions";
 
 export function* fetchProductsStart({ payload }) {
@@ -38,6 +47,26 @@ export function* fetchOneProductStart({ payload }) {
   }
 }
 
+export function* createProductStart({ payload }) {
+  try {
+    const product = yield createNewProduct(payload);
+
+    yield put(createProductSuccess(product));
+  } catch (error) {
+    yield put(createProductFailure(error));
+  }
+}
+
+export function* updateProductStart({ payload: { id, form } }) {
+  try {
+    const product = yield updateProduct(form, id);
+
+    yield put(updateProductSuccess(product));
+  } catch (error) {
+    yield put(updateProductFailure(error));
+  }
+}
+
 export function* onFetchingProductsStart() {
   yield takeLatest(ProductActionTypes.FETCH_PRODUCTS_START, fetchProductsStart);
 }
@@ -49,6 +78,19 @@ export function* onFetchingOneProductStart() {
   );
 }
 
+export function* onCreatingProductStart() {
+  yield takeLatest(ProductActionTypes.CREATE_PRODUCT_START, createProductStart);
+}
+
+export function* onUpdatingProductStart() {
+  yield takeLatest(ProductActionTypes.UPDATE_PRODUCT_START, updateProductStart);
+}
+
 export function* productsSagas() {
-  yield all([call(onFetchingProductsStart), call(onFetchingOneProductStart)]);
+  yield all([
+    call(onFetchingProductsStart),
+    call(onFetchingOneProductStart),
+    call(onCreatingProductStart),
+    call(onUpdatingProductStart),
+  ]);
 }

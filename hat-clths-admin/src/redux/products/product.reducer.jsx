@@ -33,7 +33,15 @@ const productReducer = (state = INITIAL_STATE, action) => {
         fetchingCategory: undefined,
         products,
       };
+    case ProductActionTypes.CREATE_PRODUCT_START:
+    case ProductActionTypes.UPDATE_PRODUCT_START:
+      return {
+        ...state,
+        isFetching: true,
+      };
     case ProductActionTypes.FETCH_ONE_PRODUCT_SUCCESS:
+    case ProductActionTypes.CREATE_PRODUCT_SUCCESS:
+    case ProductActionTypes.UPDATE_PRODUCT_SUCCESS:
       return {
         ...state,
         product: action.payload,
@@ -42,6 +50,8 @@ const productReducer = (state = INITIAL_STATE, action) => {
       };
     case ProductActionTypes.FETCH_PRODUCTS_FAILURE:
     case ProductActionTypes.FETCH_ONE_PRODUCT_FAILURE:
+    case ProductActionTypes.CREATE_PRODUCT_FAILURE:
+    case ProductActionTypes.UPDATE_PRODUCT_FAILURE:
       return {
         isFetching: false,
         fetchingCategory: undefined,

@@ -13,13 +13,20 @@ export const getData = async (url) => {
   }
 };
 
-export const sendData = async (url, data, method) => {
+export const sendData = async (url, data, method, isFormData = false) => {
   try {
-    const response = await axios({
+    const headers = {
+      "Content-Type": "multipart/form-data",
+    };
+    const requestOptions = {
       method,
       url,
       data,
-    });
+    };
+    if (isFormData) {
+      requestOptions.headers = headers;
+    }
+    const response = await axios(requestOptions);
 
     return response.data.data.data;
   } catch (error) {

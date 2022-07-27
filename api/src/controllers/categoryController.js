@@ -13,6 +13,9 @@ exports.getCategories = factory.getAll(Category);
 exports.updateCategory = factory.updateOne(Category);
 
 exports.incrementCategoryShow = catchAsync(async (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    return next();
+  }
   let category = await Category.findOne({ slug: req.params.slug });
 
   if (!category) {

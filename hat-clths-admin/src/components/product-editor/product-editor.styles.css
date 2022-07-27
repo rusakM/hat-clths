@@ -1,0 +1,20 @@
+.size-button,
+.deactivated-size-button {
+  padding: 0 10px;
+  min-width: 35px;
+  margin: 1px;
+}
+
+.deactivated-size-button {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #888;
+}
+
+.deactivated-size-button:hover {
+  border-color: #000;
+}
+
+.bold-border {
+  border-width: 2px;
+}

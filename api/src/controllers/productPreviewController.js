@@ -71,7 +71,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
 
   if (req.body.photos) {
     req.body.photos = [
-      ...new Set(...productPreview.photos, ...req.body.photos),
+      ...new Set(productPreview.photos.concat(req.body.photos)),
     ];
   }
 
@@ -236,7 +236,7 @@ exports.removePhoto = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.uploadPhotos = photoSaver.uploadPhotos("photos");
+exports.uploadPhotos = photoSaver.uploadPhotos("pictures");
 
 exports.resizePhotos = catchAsync(async (req, res, next) => {
   if (!req.files) {
@@ -248,7 +248,7 @@ exports.resizePhotos = catchAsync(async (req, res, next) => {
   for (let i = 0; i < req.files.length; i++) {
     await photoSaver.resizePhoto(
       req.files[i],
-      "category",
+      "product",
       900,
       1200,
       `${process.cwd()}/uploads/products`,
@@ -264,6 +264,10 @@ exports.resizePhotos = catchAsync(async (req, res, next) => {
 });
 
 exports.selectCoverPhoto = (req, res, next) => {
+  if (req.body.photos && req.body.photos.length === 0) {
+    req.body.photos = undefined;
+  }
+
   if (!req.body.imageCover && !req.body.photos) {
     return next();
   } else if (!req.body.imageCover && req.body.photos) {
@@ -272,6 +276,12 @@ exports.selectCoverPhoto = (req, res, next) => {
     return next();
   } else {
     if (req.body.imageCover >= req.body.photos.length) {
+      if (
+        typeof req.body.imageCover === "string" &&
+        req.body.imageCover.length > 10
+      ) {
+        return next();
+      }
       req.body.imageCover = req.body.photos[0];
     } else {
       req.body.imageCover = req.body.photos[req.body.imageCover];
@@ -294,6 +304,9 @@ exports.prepareProduct = (req, res, next) => {
 };
 
 exports.showProduct = catchAsync(async (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    return next();
+  }
   const productPreview = await ProductPreview.findById(req.params.id);
 
   if (!productPreview) {
