@@ -2,14 +2,16 @@ import { createSelector } from "reselect";
 import memoize from "lodash.memoize";
 
 const selectProduct = (state) => state.products;
+const defaultList = [];
+const defaultObject = {};
 
 export const selectProducts = createSelector([selectProduct], (products) =>
-  products.products ? products.products : []
+  products.products ? products.products : defaultList
 );
 
 export const selectProductsByCategory = memoize((categoryName) =>
   createSelector([selectProducts], (products) =>
-    products ? products[categoryName] : []
+    products ? products[categoryName] : defaultList
   )
 );
 
@@ -24,5 +26,5 @@ export const selectProductsError = createSelector(
 );
 
 export const selectOneProduct = createSelector([selectProduct], (products) =>
-  products ? products.product : {}
+  products ? products.product : defaultObject
 );

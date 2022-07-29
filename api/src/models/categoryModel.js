@@ -36,7 +36,7 @@ categorySchema.virtual("products", {
 });
 
 categorySchema.pre("save", function (next) {
-  this.slug = slugify(`${this.name}-${this.gender ? "d" : "m"}`, {
+  this.slug = slugify(`${this.name}-${this.gender ? "m" : "d"}`, {
     lower: true,
   });
   next();
