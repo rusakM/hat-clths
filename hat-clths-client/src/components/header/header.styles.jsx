@@ -8,6 +8,10 @@ export const HeaderContainer = styled.div`
   justify-content: space-between;
   position: absolute;
   background-color: #fff;
+
+  @media (max-width: 480px) {
+    height: 80px;
+  }
 `;
 
 export const LogoContainer = styled.div`
@@ -24,10 +28,13 @@ export const LogoIcon = styled(Link)`
 
 export const CompanyDescription = styled.h1`
   cursor: pointer;
+
+  @media (max-width: 480px) {
+    font-size: x-large;
+  }
 `;
 
 export const OptionsContainer = styled.div`
-  width: 50%;
   height: 100%;
   display: flex;
   align-items: center;

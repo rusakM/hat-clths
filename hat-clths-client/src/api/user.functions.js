@@ -1,26 +1,31 @@
 import axios from "axios";
-import { getData, AppError } from "./api.functions";
+import { getData, sendData, AppError } from "./api.functions";
 
 export const signInWithEmailAndPassword = async (email, password) => {
   try {
-    const userData = await axios({
-      method: "POST",
-      url: "/api/users/loginAdmin",
-      data: {
-        email,
-        password,
-      },
-    });
+    const userData = await sendData(
+      "/api/users/login",
+      { email, password },
+      "POST"
+    );
 
     return userData.data.data.user;
   } catch (error) {
     const { status } = error.response;
     if (status === 401) {
       throw new AppError("Nieprawidłowy login lub hasło", 401);
-    } else if (status === 403) {
-      throw new AppError("Brak uprawnień aby się zalogować", 403);
     }
     throw error;
+  }
+};
+
+export const signUp = async (signUpData) => {
+  try {
+    const userData = await sendData("/api/users/signup", signUpData, "POST");
+
+    return userData.data.data.user;
+  } catch (error) {
+    throw new AppError("Nie można utworzyć konta użytkownika", 404);
   }
 };
 

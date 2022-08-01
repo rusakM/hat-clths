@@ -11,4 +11,8 @@ export const FooterContainer = styled.div`
 
 export const FoorerParagraph = styled.span`
   color: #fff;
+
+  @media (max-width: 480px) {
+    font-size: small;
+  }
 `;

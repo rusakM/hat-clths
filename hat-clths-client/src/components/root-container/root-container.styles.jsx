@@ -13,4 +13,8 @@ export const Viewer = styled.div`
   margin-bottom: 70px;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 480px) {
+    margin-top: 80px;
+  }
 `;

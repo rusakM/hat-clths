@@ -6,6 +6,12 @@ export const CategoriesListContainer = styled.div`
   border-right: 1px solid #000;
   margin: 2em 0 90px 0;
   height: 100%;
+
+  @media (max-width: 480px) {
+    width: 100%;
+    height: auto;
+    margin-bottom: 0px;
+  }
 `;
 
 export const CategoriesListHeader = styled.h2`
