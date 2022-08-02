@@ -30,36 +30,17 @@ export const fetchOneProductFailure = (error) => ({
   payload: error,
 });
 
-export const clearProductData = () => ({
-  type: ProductActionTypes.CLEAR_PRODUCT_DATA,
+export const fetchTopProductsStart = () => ({
+  type: ProductActionTypes.FETCH_TOP_PRODUCTS_START,
+  payload: { limit: 10 },
 });
 
-export const createProductStart = (productData, id) => ({
-  type: ProductActionTypes.CREATE_PRODUCT_START,
-  payload: productData,
+export const fetchTopProductsSuccess = (productsMap) => ({
+  type: ProductActionTypes.FETCH_TOP_PRODUCTS_SUCCESS,
+  payload: productsMap,
 });
 
-export const createProductSuccess = (productData) => ({
-  type: ProductActionTypes.CREATE_PRODUCT_SUCCESS,
-  payload: productData,
-});
-
-export const createProductFailure = (error) => ({
-  type: ProductActionTypes.CREATE_PRODUCT_FAILURE,
-  payload: error,
-});
-
-export const updateProductStart = (productData, id) => ({
-  type: ProductActionTypes.UPDATE_PRODUCT_START,
-  payload: { form: productData, id },
-});
-
-export const updateProductSuccess = (productData) => ({
-  type: ProductActionTypes.UPDATE_PRODUCT_SUCCESS,
-  payload: productData,
-});
-
-export const updateProductFailure = (error) => ({
-  type: ProductActionTypes.UPDATE_PRODUCT_FAILURE,
+export const fetchTopProductsFailure = (error) => ({
+  type: ProductActionTypes.FETCH_TOP_PRODUCTS_FAILURE,
   payload: error,
 });

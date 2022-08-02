@@ -7,6 +7,7 @@ const INITIAL_STATE = {
   fetchingCategory: undefined,
   product: {},
   productId: undefined,
+  topProducts: {},
 };
 
 const productReducer = (state = INITIAL_STATE, action) => {
@@ -17,6 +18,12 @@ const productReducer = (state = INITIAL_STATE, action) => {
         isFetching: true,
         fetchingCategory: action.payload,
         product: {},
+      };
+    case ProductActionTypes.FETCH_TOP_PRODUCTS_START:
+      return {
+        ...state,
+        isFetching: true,
+        topProducts: {},
       };
     case ProductActionTypes.FETCH_ONE_PRODUCT_START:
       return {
@@ -33,15 +40,13 @@ const productReducer = (state = INITIAL_STATE, action) => {
         fetchingCategory: undefined,
         products,
       };
-    case ProductActionTypes.CREATE_PRODUCT_START:
-    case ProductActionTypes.UPDATE_PRODUCT_START:
+    case ProductActionTypes.FETCH_TOP_PRODUCTS_SUCCESS:
       return {
         ...state,
-        isFetching: true,
+        isFetching: false,
+        topProducts: action.payload,
       };
     case ProductActionTypes.FETCH_ONE_PRODUCT_SUCCESS:
-    case ProductActionTypes.CREATE_PRODUCT_SUCCESS:
-    case ProductActionTypes.UPDATE_PRODUCT_SUCCESS:
       return {
         ...state,
         product: action.payload,
@@ -50,18 +55,12 @@ const productReducer = (state = INITIAL_STATE, action) => {
       };
     case ProductActionTypes.FETCH_PRODUCTS_FAILURE:
     case ProductActionTypes.FETCH_ONE_PRODUCT_FAILURE:
-    case ProductActionTypes.CREATE_PRODUCT_FAILURE:
-    case ProductActionTypes.UPDATE_PRODUCT_FAILURE:
+    case ProductActionTypes.FETCH_TOP_PRODUCTS_FAILURE:
       return {
         isFetching: false,
         fetchingCategory: undefined,
         error: action.payload,
         productId: undefined,
-      };
-    case ProductActionTypes.CLEAR_PRODUCT_DATA:
-      return {
-        ...state,
-        product: {},
       };
     default:
       return state;

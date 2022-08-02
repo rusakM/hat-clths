@@ -2,13 +2,19 @@ import { takeLatest, call, all, put } from "redux-saga/effects";
 import ProductActionTypes from "./product.types";
 
 import { getDocuments } from "../../api/category.functions";
-import { getNewProducts, getProduct } from "../../api/product.functions";
+import {
+  getNewProducts,
+  getProduct,
+  getTopProducts,
+} from "../../api/product.functions";
 
 import {
   fetchProductsSuccess,
   fetchProductsFailure,
   fetchOneProductSuccess,
   fetchOneProductFailure,
+  fetchTopProductsSuccess,
+  fetchTopProductsFailure,
 } from "./product.actions";
 
 export function* fetchProductsStart({ payload }) {
@@ -38,6 +44,20 @@ export function* fetchOneProductStart({ payload }) {
   }
 }
 
+export function* fetchTopProductsStart({ payload }) {
+  try {
+    let limit = null;
+    if (payload && payload.limit) {
+      limit = payload.limit;
+    }
+    const products = yield getTopProducts(limit);
+
+    yield put(fetchTopProductsSuccess(products));
+  } catch (error) {
+    yield put(fetchTopProductsFailure(error));
+  }
+}
+
 export function* onFetchingProductsStart() {
   yield takeLatest(ProductActionTypes.FETCH_PRODUCTS_START, fetchProductsStart);
 }
@@ -49,6 +69,17 @@ export function* onFetchingOneProductStart() {
   );
 }
 
+export function* onFetchingTopProductsStart() {
+  yield takeLatest(
+    ProductActionTypes.FETCH_TOP_PRODUCTS_START,
+    fetchTopProductsStart
+  );
+}
+
 export function* productsSagas() {
-  yield all([call(onFetchingProductsStart), call(onFetchingOneProductStart)]);
+  yield all([
+    call(onFetchingProductsStart),
+    call(onFetchingOneProductStart),
+    call(onFetchingTopProductsStart),
+  ]);
 }

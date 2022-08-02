@@ -28,3 +28,7 @@ export const selectProductsError = createSelector(
 export const selectOneProduct = createSelector([selectProduct], (products) =>
   products ? products.product : defaultObject
 );
+
+export const selectTopProducts = createSelector([selectProduct], (products) =>
+  products ? products.topProducts : defaultList
+);

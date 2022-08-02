@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { connect } from "react-redux";
 import { useMediaQuery } from "react-responsive";
 
 import Tile from "../../components/tile/tile.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
+import Spinner from "../../components/spinner/spinner.component";
+
+import { fetchTopProductsStart } from "../../redux/products/product.actions";
 
 import {
   MainPageContainer,
@@ -17,10 +21,18 @@ import forHim from "../../assets/landing-page/for-him.webp";
 
 import "./main-page.styles.css";
 
-const MainPage = () => {
+const TopProductsList = lazy(() =>
+  import("../../components/top-products-list/top-products-list.container")
+);
+
+const MainPage = ({ fetchTopProducts }) => {
   const isMobile = useMediaQuery({
     maxWidth: 480,
   });
+
+  useEffect(() => {
+    fetchTopProducts();
+  }, [fetchTopProducts]);
 
   return (
     <MainPageContainer>
@@ -105,9 +117,16 @@ const MainPage = () => {
           </Row>
         )}
         <h3>Polecane</h3>
+        <Suspense fallback={<Spinner />}>
+          <TopProductsList />
+        </Suspense>
       </ListsContainer>
     </MainPageContainer>
   );
 };
 
-export default MainPage;
+const mapDispatchToProps = (dispatch) => ({
+  fetchTopProducts: () => dispatch(fetchTopProductsStart()),
+});
+
+export default connect(null, mapDispatchToProps)(MainPage);
