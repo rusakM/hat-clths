@@ -1,16 +1,21 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-export const TileContainer = (width, unit) => styled(Link)`
+export const TileContainer = (width, unit, height) => styled(Link)`
   width: ${width}${unit};
+  ${height && `height: ${height}${unit};`}
   display: flex;
   flex-direction: column;
   margin: 10px;
+
+  @media (max-width: 480px) {
+    margin: 5px;
+  }
 `;
 
-export const IconContainer = (width, unit) => styled.div`
+export const IconContainer = (width, unit, height) => styled.div`
   width: ${width}${unit};
-  height: ${width}${unit};
+  height: ${height ? height : width}${unit};
   border: 1px solid #000;
   display: flex;
   align-items: center;
@@ -21,7 +26,7 @@ export const IconContainer = (width, unit) => styled.div`
   }
 
   & > div {
-    height: ${width - 6}${unit};
+    height: ${height ? height - 6 : width - 6}${unit};
     width: ${width - 4}${unit};
     background-position: center center;
     background-repeat: no-repeat;
@@ -34,6 +39,12 @@ export const IconContainer = (width, unit) => styled.div`
     width: 50%;
     height: 50%;
     font-size: 80px;
+  }
+
+  & > .background-tile {
+    width: 100%;
+    height: 100%;
+    margin: 0;
   }
 `;
 

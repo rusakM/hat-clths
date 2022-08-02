@@ -13,7 +13,9 @@ exports.getProduct = factory.getOne(ProductPreview);
 exports.getProducts = factory.getAll(ProductPreview);
 
 exports.limitNewProducts = (req, res, next) => {
-  req.query.limit = 25;
+  if (!req.query.limit) {
+    req.query.limit = 25;
+  }
   next();
 };
 

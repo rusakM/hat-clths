@@ -41,10 +41,23 @@ a {
   display: flex;
   flex-direction: row;
   align-items: center;
+  width: 100%;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .space-between {
   justify-content: space-between !important;
+}
+
+.absolute-position {
+  margin-top: 70px;
+  position: absolute;
 }
 
 @media (max-width: 480px) {

@@ -15,6 +15,7 @@ import "./App.css";
 const MobileMenu = lazy(() =>
   import("./components/mobile-menu/mobile-menu.component")
 );
+const MainPage = lazy(() => import("./pages/main-page/main-page.component"));
 
 const App = () => {
   const isMobile = useMediaQuery({
@@ -30,7 +31,7 @@ const App = () => {
         <Suspense fallback={<Spinner />}>
           {isMobile && !menuHidden && <MobileMenu />}
           <Routes>
-            <Route element={<div></div>} path="/" />
+            <Route element={<MainPage />} path="/" />
           </Routes>
         </Suspense>
       </RootContainer>
