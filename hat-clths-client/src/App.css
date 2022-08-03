@@ -55,6 +55,10 @@ a {
   justify-content: space-between !important;
 }
 
+.space-sround {
+  justify-content: space-around !important;
+}
+
 .absolute-position {
   margin-top: 70px;
   position: absolute;

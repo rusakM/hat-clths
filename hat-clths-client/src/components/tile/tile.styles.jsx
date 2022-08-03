@@ -1,9 +1,8 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-export const TileContainer = (width, unit, height) => styled(Link)`
+export const TileContainer = (width, unit) => styled(Link)`
   width: ${width}${unit};
-  ${height && `height: ${height}${unit};`}
   display: flex;
   flex-direction: column;
   margin: 10px;
@@ -26,8 +25,8 @@ export const IconContainer = (width, unit, height) => styled.div`
   }
 
   & > div {
-    height: ${height ? height - 6 : width - 6}${unit};
-    width: ${width - 4}${unit};
+    height: 100%;
+    width: 100%;
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
