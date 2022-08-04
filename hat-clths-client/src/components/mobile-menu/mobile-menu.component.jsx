@@ -35,17 +35,17 @@ const Menu = ({ fetchCategories, toggleMenu, signOutStart, currentUser }) => {
     <MenuContainer>
       <MenuHeader>
         <LogoContainer>
-          <OptionsLink to="/" onClick={toggleMenu}>
+          <OptionsLink as="div" onClick={toggleMenu}>
             <FontAwesomeIcon icon={faTimes} />
           </OptionsLink>
-          <LogoIcon to="/">
+          <LogoIcon to="/" onClick={toggleMenu}>
             <img src={Logo} alt="logo" className="logo" />
           </LogoIcon>
           <CompanyDescription>Hat-clths</CompanyDescription>
         </LogoContainer>
       </MenuHeader>
       <Suspense fallback={<Spinner />}>
-        <CategoriesList />
+        <CategoriesList additionalAction={toggleMenu} />
         <Link to="/cart">
           <CategoriesListHeader>Koszyk</CategoriesListHeader>
         </Link>

@@ -31,3 +31,13 @@ export const getTopProducts = async (limit) => {
     throw new AppError("Błąd pobierania danych...", 404);
   }
 };
+
+export const getReviews = async (productId) => {
+  try {
+    const reviews = await getData(`/api/products/${productId}/reviews`);
+
+    return reviews;
+  } catch (error) {
+    throw new AppError("Błąd pobierania danych...", 404);
+  }
+};

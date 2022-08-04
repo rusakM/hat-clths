@@ -6,6 +6,7 @@ export const CategoriesListContainer = styled.div`
   border-right: 1px solid #000;
   margin: 2em 0 90px 0;
   height: 100%;
+  min-width: 200px;
 
   @media (max-width: 480px) {
     width: 100%;

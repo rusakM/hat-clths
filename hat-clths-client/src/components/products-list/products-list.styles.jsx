@@ -5,21 +5,25 @@ export const ProductsListContainer = styled.div`
   flex-direction: column;
   padding: 1.5em;
   width: 100%;
+
+  @media (max-width: 480px) {
+    padding: 0.5em;
+  }
 `;
 
 export const ProductsListRow = styled.div`
   display: flex;
   flex-diredction: row;
   justify-content: flex-start;
-  align-items: center;
+  align-items: baseline;
   width: 100%;
 `;
 
 export const ProductsListCategoryName = styled.h2`
   padding: 1.5em;
-  & > * {
-    padding: 0.25em;
-    font-size: 20px;
-    cursor: pointer;
+
+  @media (max-width: 480px) {
+    padding: 0;
+    width: 100%;
   }
 `;

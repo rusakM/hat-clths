@@ -2,10 +2,10 @@ import React, { useEffect, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { connect } from "react-redux";
 import { fetchOneProductStart } from "../../redux/products/product.actions";
-import { fetchCategoriesStart } from "../../redux/category/category.actions";
 import Spinner from "../../components/spinner/spinner.component";
+import ProductViewerContainer from "../../components/product-viewer/product-viewer.container";
 
-const ProductPage = ({ fetchCategoriesStart, fetchOneProductStart }) => {
+const ProductPage = ({ fetchOneProductStart, fetchReviewsStart }) => {
   const params = useParams();
   const { productId } = params;
 
@@ -13,16 +13,18 @@ const ProductPage = ({ fetchCategoriesStart, fetchOneProductStart }) => {
     if (productId) {
       fetchOneProductStart(productId);
     }
-    fetchCategoriesStart();
-  }, [fetchCategoriesStart, fetchOneProductStart, productId]);
+  }, [fetchOneProductStart, productId]);
 
-  return <Suspense fallback={<Spinner />}></Suspense>;
+  return (
+    <Suspense fallback={<Spinner />}>
+      <ProductViewerContainer />
+    </Suspense>
+  );
 };
 
 const mapDispatchToProps = (dispatch) => ({
   fetchOneProductStart: (productId) =>
     dispatch(fetchOneProductStart(productId)),
-  fetchCategoriesStart: () => dispatch(fetchCategoriesStart()),
 });
 
 export default connect(null, mapDispatchToProps)(ProductPage);

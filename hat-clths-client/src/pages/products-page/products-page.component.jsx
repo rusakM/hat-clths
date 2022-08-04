@@ -1,4 +1,5 @@
 import React, { useEffect, lazy, Suspense } from "react";
+import { useMediaQuery } from "react-responsive";
 import { useParams } from "react-router-dom";
 import { connect } from "react-redux";
 
@@ -17,6 +18,9 @@ const ProductsList = lazy(() =>
 );
 
 const ProductsPage = ({ fetchCategoriesStart, fetchProductsStart }) => {
+  const isMobile = useMediaQuery({
+    maxWidth: 480,
+  });
   const params = useParams();
   console.log(params);
 
@@ -32,7 +36,7 @@ const ProductsPage = ({ fetchCategoriesStart, fetchProductsStart }) => {
   return (
     <ProductsPageContainer>
       <Suspense fallback={<Spinner />}>
-        <CategoriesList />
+        {!isMobile && <CategoriesList />}
         <ProductsList category={category} />
       </Suspense>
     </ProductsPageContainer>

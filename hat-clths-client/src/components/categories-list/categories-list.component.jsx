@@ -12,8 +12,7 @@ import {
 } from "./categories-list.styles";
 import { selectCategories } from "../../redux/category/category.selectors";
 
-
-const CategoriesList = ({ categories }) => {
+const CategoriesList = ({ categories, additionalAction }) => {
   const [visibilityLists, changeVisibilityLists] = useState({
     forHim: false,
     forHer: false,
@@ -29,6 +28,12 @@ const CategoriesList = ({ categories }) => {
       ...visibilityLists,
       [name]: !visibilityLists[name],
     });
+  };
+
+  const performAction = () => {
+    if (additionalAction) {
+      additionalAction();
+    }
   };
 
   return (
@@ -49,6 +54,7 @@ const CategoriesList = ({ categories }) => {
           <CategoriesListItem
             to={`/products/${category.slug}`}
             key={key + category.slug}
+            onClick={performAction}
           >
             {category.name}
           </CategoriesListItem>
@@ -66,6 +72,7 @@ const CategoriesList = ({ categories }) => {
           <CategoriesListItem
             to={`/products/${category.slug}`}
             key={key + category.slug}
+            onClick={performAction}
           >
             {category.name}
           </CategoriesListItem>

@@ -3,8 +3,9 @@ import styled from "styled-components";
 export const SelectContainer = styled.div`
   position: relative;
   display: flex;
-  width: 20vw;
-  height: 3em;
+  max-width: 350px;
+  min-width: 250px;
+  height: 50px;
   overflow: hidden;
   font-family: "Open Sans Condensed";
 
@@ -23,6 +24,12 @@ export const SelectContainer = styled.div`
 
   &:hover:after {
     color: #bbb;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    max-width: unset;
+    min-width: unset;
   }
 `;
 

@@ -1,9 +1,10 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { useMediaQuery } from "react-responsive";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
+import Spinner from "../spinner/spinner.component";
 
 import { ReactComponent as Logo } from "../../assets/top-hat.svg";
 
@@ -11,6 +12,7 @@ import {
   selectCurrentUser,
   selectLoginError,
 } from "../../redux/user/user.selectors";
+import { selectMenuHidden } from "../../redux/mobile-menu/menu.selectors";
 import { signOutStart } from "../../redux/user/user.actions";
 import { toggleMenuHidden } from "../../redux/mobile-menu/menu.actions";
 
@@ -23,13 +25,18 @@ import {
   OptionsLink,
 } from "./header.styles";
 
-const Header = ({ currentUser, signOutStart, toggleMenu }) => {
+const MobileMenu = lazy(() => import("../mobile-menu/mobile-menu.component"));
+
+const Header = ({ currentUser, signOutStart, toggleMenu, menuHidden }) => {
   const isMobile = useMediaQuery({
     maxWidth: 480,
   });
 
   return (
     <HeaderContainer>
+      <Suspense fallback={<Spinner />}>
+        {isMobile && !menuHidden && <MobileMenu />}
+      </Suspense>
       <LogoContainer>
         {isMobile && (
           <OptionsLink
@@ -67,6 +74,7 @@ const Header = ({ currentUser, signOutStart, toggleMenu }) => {
 const mapStateToProps = createStructuredSelector({
   currentUser: selectCurrentUser,
   loginError: selectLoginError,
+  menuHidden: selectMenuHidden,
 });
 
 const mapDispatchToProps = (dispatch) => ({

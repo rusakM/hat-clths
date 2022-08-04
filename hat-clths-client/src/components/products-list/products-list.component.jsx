@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { useMediaQuery } from "react-responsive";
 
 import Tile from "../tile/tile.component";
 import formatPrice from "../../utils/formatPrice";
@@ -12,8 +13,13 @@ import {
 } from "./products-list.styles";
 
 const ProductsList = ({ category }) => {
+  const isMobile = useMediaQuery({
+    maxWidth: 480,
+  });
   const products = useSelector(selectProducts);
   const cat = useSelector(selectCategoryBySlug(category));
+  const productsInRow = isMobile ? 2 : 4;
+  const tileWidth = isMobile ? 45 : 17.5;
 
   const mappedProducts = [[]];
   let index = 0;
@@ -21,7 +27,7 @@ const ProductsList = ({ category }) => {
     if (products.length === 0) {
       break;
     }
-    if (mappedProducts[index].length === 3) {
+    if (mappedProducts[index].length === productsInRow) {
       index++;
       mappedProducts.push([]);
     }
@@ -30,20 +36,18 @@ const ProductsList = ({ category }) => {
 
   return (
     <ProductsListContainer>
-      <ProductsListRow className="space-between">
-        <div className="row">
-          {cat && (
-            <ProductsListCategoryName>{cat.name}</ProductsListCategoryName>
-          )}
-        </div>
-        <p>Znaleziono produktów: {products ? products.length : 0}</p>
-      </ProductsListRow>
+      {cat && <ProductsListCategoryName>{cat.name}</ProductsListCategoryName>}
+      <p style={{ textAlign: "right" }}>
+        Znaleziono produktów: {products ? products.length : 0}
+      </p>
       {products &&
         mappedProducts.map((productsRow, num) => (
           <ProductsListRow key={num}>
             {productsRow.map(({ name, price, id, imageCover, category }) => (
               <Tile
-                width={250}
+                width={tileWidth}
+                unit="vw"
+                height={tileWidth}
                 link={`/products/${category.slug}/${id}`}
                 key={id}
                 descriptionRows={[name, formatPrice(price)]}

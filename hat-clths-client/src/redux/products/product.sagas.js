@@ -6,6 +6,7 @@ import {
   getNewProducts,
   getProduct,
   getTopProducts,
+  getReviews,
 } from "../../api/product.functions";
 
 import {
@@ -37,6 +38,8 @@ export function* fetchOneProductStart({ payload }) {
       yield put({});
     }
     const product = yield getProduct(payload);
+    const reviews = yield getReviews(payload);
+    product.reviews = reviews;
 
     yield put(fetchOneProductSuccess(product));
   } catch (error) {
