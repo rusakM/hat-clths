@@ -44,3 +44,18 @@ export const fetchTopProductsFailure = (error) => ({
   type: ProductActionTypes.FETCH_TOP_PRODUCTS_FAILURE,
   payload: error,
 });
+
+export const sendReviewStart = (reviewData, productId) => ({
+  type: ProductActionTypes.SEND_REVIEW_START,
+  payload: { reviewData, productId },
+});
+
+export const sendReviewSuccess = (reviews) => ({
+  type: ProductActionTypes.SEND_REVIEW_SUCCESS,
+  payload: reviews,
+});
+
+export const sendReviewFailure = (error) => ({
+  type: ProductActionTypes.SEND_REVIEW_FAILURE,
+  payload: error,
+});

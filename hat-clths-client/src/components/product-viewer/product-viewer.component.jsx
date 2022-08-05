@@ -6,14 +6,18 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { createStructuredSelector } from "reselect";
 
 import { selectOneProduct } from "../../redux/products/product.selectors";
+import { selectCurrentUser } from "../../redux/user/user.selectors";
+import { sendReviewStart } from "../../redux/products/product.actions";
 
 import CustomButton from "../custom-button/custom-button.component";
 import ThumbnailsList from "../thumbnails-list/thumbnails-list.component";
 import CustomSelect from "../custom-select/custom-select.component";
 import Review from "../review/review.component";
+import Stars from "../stars/stars.component";
 
 import formatPrice from "../../utils/formatPrice";
 import calculateAverageRating from "./calculateAverage";
+import PRODUCT_SIZES from "../../utils/productSizes";
 
 import {
   ProductPageContainer,
@@ -28,15 +32,18 @@ import {
   SizesContainer,
   DescriptionContainer,
   ReviewsContainer,
+  ReviewForm,
+  ReviewField,
 } from "./product-viewer.styles";
 
 import "./product-viewer.styles.css";
 
-const ProductViewer = ({ product }) => {
+const ProductViewer = ({ product, currentUser, sendReview }) => {
   if (!product) {
     product = {};
   }
   const {
+    _id,
     name,
     price,
     description,
@@ -59,19 +66,20 @@ const ProductViewer = ({ product }) => {
   }
 
   if (products && products.length > 0) {
-    availableSizesList = products.map(({ _id, size }) => ({
-      name: size,
-      value: _id,
-    }));
+    const sizesKeys = Object.values(PRODUCT_SIZES);
+    for (const size of sizesKeys) {
+      let temp = products.find((product) => product.size === size);
+      if (temp) {
+        availableSizesList.push({ name: temp.size, value: temp._id });
+      }
+    }
   }
-
-  console.log(availableSizesList);
 
   const [photoIndex, setPhotoIndex] = useState(defaultPhoto);
   const [selectedSize, setSize] = useState(null);
-
-  const sizes = (products && products.map(({ size }) => size)) || [];
-  console.log(sizes);
+  const [showedReviews, setShowedReviews] = useState(10);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(0);
 
   const selectCoverPhoto = (index) => {
     setPhotoIndex(index);
@@ -79,6 +87,28 @@ const ProductViewer = ({ product }) => {
 
   const selectSize = (event) => {
     setSize(event.target.value);
+  };
+
+  const incrementReviews = () => {
+    setShowedReviews(showedReviews + 10);
+  };
+
+  const reviewHandler = (event) => {
+    setReviewText(event.target.value);
+  };
+
+  const ratingHandler = (rating) => {
+    setReviewRating(rating);
+  };
+
+  const resetReview = () => {
+    setReviewText("");
+    setReviewRating(0);
+  };
+
+  const sendReviewTrigger = () => {
+    sendReview({ review: reviewText, rating: reviewRating }, _id);
+    resetReview();
   };
 
   return (
@@ -145,9 +175,35 @@ const ProductViewer = ({ product }) => {
               reviews
             )}/5, liczba ocen: ${reviews.length}`}</h4>
           ))}
+        {currentUser && (
+          <ReviewForm>
+            <p>
+              Twoja ocena:&nbsp;
+              <h3>
+                <Stars rating={reviewRating} changeHandler={ratingHandler} />
+              </h3>
+            </p>
+            <ReviewField
+              value={reviewText}
+              onChange={reviewHandler}
+            ></ReviewField>
+            <CustomButton onClick={sendReviewTrigger}>
+              Dodaj opinię
+            </CustomButton>
+          </ReviewForm>
+        )}
         {reviews &&
           reviews.length > 0 &&
-          reviews.map((review) => <Review review={review} key={review._id} />)}
+          reviews.map((review, i) =>
+            i < showedReviews ? (
+              <Review review={review} key={review._id} />
+            ) : null
+          )}
+        {reviews && reviews.length > showedReviews && (
+          <CustomButton onClick={incrementReviews}>
+            Poprzednie opinie
+          </CustomButton>
+        )}
       </ReviewsContainer>
     </ProductPageContainer>
   );
@@ -155,6 +211,12 @@ const ProductViewer = ({ product }) => {
 
 const mapStateToProps = createStructuredSelector({
   product: selectOneProduct,
+  currentUser: selectCurrentUser,
 });
 
-export default connect(mapStateToProps)(ProductViewer);
+const mapDispatchToProps = (dispatch) => ({
+  sendReview: (reviewData, productId) =>
+    dispatch(sendReviewStart(reviewData, productId)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProductViewer);

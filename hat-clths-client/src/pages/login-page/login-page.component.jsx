@@ -38,7 +38,7 @@ const LoginPage = ({ signInStart, loginError }) => {
 
   return (
     <LoginPageContainer>
-      <LoginPageHeader>Logowanie do panelu</LoginPageHeader>
+      <LoginPageHeader>Zaloguj się:</LoginPageHeader>
       <LoginPageForm onSubmit={handleSubmit}>
         <FormInput
           name="email"

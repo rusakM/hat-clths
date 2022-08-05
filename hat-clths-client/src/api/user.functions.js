@@ -3,14 +3,18 @@ import { getData, sendData, AppError } from "./api.functions";
 
 export const signInWithEmailAndPassword = async (email, password) => {
   try {
-    const userData = await sendData(
-      "/api/users/login",
-      { email, password },
-      "POST"
-    );
+    const userData = await axios({
+      method: "POST",
+      url: "/api/users/login",
+      data: {
+        email,
+        password,
+      },
+    });
 
     return userData.data.data.user;
   } catch (error) {
+    console.log(error);
     const { status } = error.response;
     if (status === 401) {
       throw new AppError("Nieprawidłowy login lub hasło", 401);

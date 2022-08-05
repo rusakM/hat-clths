@@ -96,6 +96,11 @@ productPreviewSchema.pre(/^findOne/, function (next) {
     path: "reviews",
     select: "-__v",
     options: { _recursed: true },
+    populate: {
+      path: "user",
+      select: "_id name",
+      options: { _recursed: true },
+    },
   });
 
   next();

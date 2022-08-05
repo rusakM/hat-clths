@@ -38,7 +38,7 @@ const CategoriesList = ({ categories, additionalAction }) => {
 
   return (
     <CategoriesListContainer>
-      <Link to="/products">
+      <Link to="/products" onClick={performAction}>
         <CategoriesListHeader>Nowości</CategoriesListHeader>
       </Link>
 

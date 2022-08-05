@@ -10,6 +10,7 @@ router.get(
   "/new",
   authController.tryProtect,
   productPreviewController.limitNewProducts,
+  productPreviewController.sortNewProducts,
   productPreviewController.getProducts
 );
 

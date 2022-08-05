@@ -46,15 +46,25 @@ const Menu = ({ fetchCategories, toggleMenu, signOutStart, currentUser }) => {
       </MenuHeader>
       <Suspense fallback={<Spinner />}>
         <CategoriesList additionalAction={toggleMenu} />
-        <Link to="/cart">
+        {currentUser && (
+          <Link to="/account" onClick={toggleMenu}>
+            <CategoriesListHeader>Moje konto</CategoriesListHeader>
+          </Link>
+        )}
+        <Link to="/cart" onClick={toggleMenu}>
           <CategoriesListHeader>Koszyk</CategoriesListHeader>
         </Link>
         {currentUser ? (
-          <Link as="div" onClick={signOutStart}>
-            <CategoriesListHeader>Wyloguj</CategoriesListHeader>
-          </Link>
+          <CategoriesListHeader
+            onClick={() => {
+              signOutStart();
+              toggleMenu();
+            }}
+          >
+            Wyloguj
+          </CategoriesListHeader>
         ) : (
-          <Link to="/login">
+          <Link to="/login" onClick={toggleMenu}>
             <CategoriesListHeader>Logowanie</CategoriesListHeader>
           </Link>
         )}

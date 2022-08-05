@@ -22,7 +22,6 @@ const ProductsPage = ({ fetchCategoriesStart, fetchProductsStart }) => {
     maxWidth: 480,
   });
   const params = useParams();
-  console.log(params);
 
   let category = "new";
   if (params.id) {

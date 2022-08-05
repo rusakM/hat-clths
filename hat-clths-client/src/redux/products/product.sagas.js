@@ -7,6 +7,7 @@ import {
   getProduct,
   getTopProducts,
   getReviews,
+  sendReview,
 } from "../../api/product.functions";
 
 import {
@@ -16,6 +17,8 @@ import {
   fetchOneProductFailure,
   fetchTopProductsSuccess,
   fetchTopProductsFailure,
+  sendReviewSuccess,
+  sendReviewFailure,
 } from "./product.actions";
 
 export function* fetchProductsStart({ payload }) {
@@ -38,12 +41,22 @@ export function* fetchOneProductStart({ payload }) {
       yield put({});
     }
     const product = yield getProduct(payload);
-    const reviews = yield getReviews(payload);
-    product.reviews = reviews;
+    // const reviews = yield getReviews(payload);
+    // product.reviews = reviews;
 
     yield put(fetchOneProductSuccess(product));
   } catch (error) {
     yield put(fetchOneProductFailure(error));
+  }
+}
+
+export function* sendReviewStart({ payload: { reviewData, productId } }) {
+  try {
+    yield sendReview(reviewData, productId);
+    const reviews = yield getReviews(productId);
+    yield put(sendReviewSuccess(reviews));
+  } catch (error) {
+    yield put(sendReviewFailure(error));
   }
 }
 
@@ -79,10 +92,15 @@ export function* onFetchingTopProductsStart() {
   );
 }
 
+export function* onSendingReviewStart() {
+  yield takeLatest(ProductActionTypes.SEND_REVIEW_START, sendReviewStart);
+}
+
 export function* productsSagas() {
   yield all([
     call(onFetchingProductsStart),
     call(onFetchingOneProductStart),
     call(onFetchingTopProductsStart),
+    call(onSendingReviewStart),
   ]);
 }

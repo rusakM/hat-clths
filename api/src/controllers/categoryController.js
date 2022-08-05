@@ -59,7 +59,9 @@ exports.getCategoryProducts = catchAsync(async (req, res, next) => {
 
   category = category.toObject();
 
-  let products = await ProductPreview.find({ category: category._id });
+  let products = await ProductPreview.find({ category: category._id }).sort(
+    "-_id"
+  );
 
   if (!products) {
     products = [];

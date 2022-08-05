@@ -1,4 +1,4 @@
-import { getData, AppError } from "./api.functions";
+import { getData, sendData, AppError } from "./api.functions";
 
 export const getNewProducts = async () => {
   try {
@@ -39,5 +39,20 @@ export const getReviews = async (productId) => {
     return reviews;
   } catch (error) {
     throw new AppError("Błąd pobierania danych...", 404);
+  }
+};
+
+export const sendReview = async (reviewData, productId) => {
+  try {
+    const review = await sendData(
+      `/api/products/${productId}/reviews`,
+      reviewData,
+      "POST",
+      false
+    );
+
+    return review;
+  } catch (error) {
+    throw new AppError("Błąd wysyłania danych...", 404);
   }
 };

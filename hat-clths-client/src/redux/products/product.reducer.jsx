@@ -31,6 +31,11 @@ const productReducer = (state = INITIAL_STATE, action) => {
         isFetching: true,
         productId: action.payload,
       };
+    case ProductActionTypes.SEND_REVIEW_START:
+      return {
+        ...state,
+        isFetching: true,
+      };
     case ProductActionTypes.FETCH_PRODUCTS_SUCCESS:
       const products = action.payload;
       products.fetchingCategory = state.fetchingCategory;
@@ -53,9 +58,18 @@ const productReducer = (state = INITIAL_STATE, action) => {
         isFetching: false,
         productId: undefined,
       };
+    case ProductActionTypes.SEND_REVIEW_SUCCESS:
+      const { product } = state;
+      product.reviews = action.payload;
+      return {
+        ...state,
+        isFetching: false,
+        product,
+      };
     case ProductActionTypes.FETCH_PRODUCTS_FAILURE:
     case ProductActionTypes.FETCH_ONE_PRODUCT_FAILURE:
     case ProductActionTypes.FETCH_TOP_PRODUCTS_FAILURE:
+    case ProductActionTypes.SEND_REVIEW_FAILURE:
       return {
         isFetching: false,
         fetchingCategory: undefined,

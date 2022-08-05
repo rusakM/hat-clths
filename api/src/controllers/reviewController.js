@@ -9,7 +9,9 @@ exports.updateReview = factory.updateOne(Review);
 exports.deleteReview = factory.deleteOne(Review);
 
 exports.getReviews = catchAsync(async (req, res, next) => {
-  const reviews = await Review.find({ productPreview: req.params.id });
+  const reviews = await Review.find({ productPreview: req.params.id }).sort(
+    "-createdAt"
+  );
 
   if (!reviews) {
     return next(new AppError("Brak danych", 404));

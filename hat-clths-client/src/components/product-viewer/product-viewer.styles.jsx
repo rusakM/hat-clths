@@ -133,3 +133,30 @@ export const ReviewsContainer = styled.div`
     margin: 0;
   }
 `;
+
+export const ReviewForm = styled.form`
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 480px) {
+    width: 90%;
+
+    & > button {
+      margin: 0 1em;
+      width: 100%;
+    }
+  }
+`;
+
+export const ReviewField = styled.textarea`
+  padding: 5px;
+  margin: 0.5em 1em;
+  width: 100%;
+  height: 70px;
+  border: 1px solid #000;
+
+  @media (min-width: 480px) {
+    margin-left: 0;
+  }
+`;

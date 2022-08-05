@@ -1,29 +1,23 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
-
+import Stars from "../stars/stars.component";
 import { formatDate } from "../../utils/formatDate";
-
 import { ReviewContainer } from "./review.styles";
 
 const Review = ({ review }) => {
-  const { rating, createdAt, user } = review;
-
-  const Stars = [];
-
-  for (let i = 0; i < rating; i++) {
-    Stars.push(<FontAwesomeIcon icon={faStar} key={i} />);
-  }
-
-  for (let i = 0; i < 5 - rating; i++) {
-    Stars.push(<FontAwesomeIcon icon={farStar} key={i + 5} />);
-  }
+  const {
+    rating,
+    createdAt,
+    user: { name },
+  } = review;
 
   return (
     <ReviewContainer>
       <h5>
-        {user.name.split(" ")[0]}&nbsp;<span>{Stars}</span>&nbsp;
+        {name.split(" ")[0]}&nbsp;
+        <span>
+          <Stars rating={rating} />
+        </span>
+        &nbsp;
         {formatDate(createdAt)}
       </h5>
       <p>{review.review}</p>

@@ -19,6 +19,13 @@ exports.limitNewProducts = (req, res, next) => {
   next();
 };
 
+exports.sortNewProducts = (req, res, next) => {
+  if (!req.query.sort) {
+    req.query.sort = "-_id";
+  }
+  next();
+};
+
 exports.createProduct = catchAsync(async (req, res, next) => {
   const productPreview = await ProductPreview.create(req.body);
 
