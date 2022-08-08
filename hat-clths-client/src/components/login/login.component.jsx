@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { useMediaQuery } from "react-responsive";
+import { GoogleLogin } from "@react-oauth/google";
 
 import FormInput from "../../components/form-input/form-input.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
@@ -27,7 +28,10 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
     password: "",
   });
 
+  const [isGoogleSignInOpened, setGoogleSignIn] = useState(false);
+
   const { email, password } = userCredentials;
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,6 +44,11 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
       ...userCredentials,
       [name]: value,
     });
+  };
+
+  const openGoogleSignIn = (event) => {
+    event.preventDefault();
+    setGoogleSignIn(!isGoogleSignInOpened)
   };
 
   return (
@@ -67,7 +76,7 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
         )}
         <ButtonsContainer className={isMobile ? "column" : "row"}>
           <CustomButton type="submit">Zaloguj</CustomButton>
-          <CustomButton isGoogleSignIn>Logowanie Google</CustomButton>
+          <CustomButton isGoogleSignIn onClick={openGoogleSignIn}>Logowanie Google</CustomButton>
         </ButtonsContainer>
       </LoginForm>
       {isMobile && (
@@ -75,6 +84,12 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
           Rejestracja nowego użytkownika
         </Register>
       )}
+      { isGoogleSignInOpened && <GoogleLogin onSuccess={credentialResponse => {
+    console.log(credentialResponse);
+  }}
+  onError={() => {
+    console.log('Login Failed');
+  }}/> }
     </LoginContainer>
   );
 };
