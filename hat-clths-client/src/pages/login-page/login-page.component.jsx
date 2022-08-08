@@ -1,76 +1,33 @@
 import React, { useState } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useMediaQuery } from "react-responsive";
 
-import FormInput from "../../components/form-input/form-input.component";
-import CustomButton from "../../components/custom-button/custom-button.component";
+import Login from "../../components/login/login.component";
+import SignUp from "../../components/signup/signup.component";
 
-import { signInStart } from "../../redux/user/user.actions";
-import { selectLoginError } from "../../redux/user/user.selectors";
+import { LoginPageContainer } from "./login-page.styles";
 
-import {
-  LoginPageContainer,
-  LoginPageHeader,
-  LoginPageForm,
-  LoginPageWarn,
-} from "./login-page.styles";
-
-const LoginPage = ({ signInStart, loginError }) => {
-  const [userCredentials, setCredentials] = useState({
-    email: "",
-    password: "",
+const LoginPage = () => {
+  const isMobile = useMediaQuery({
+    maxWidth: 480,
   });
+  const [registrationHidden, setRegistrationHidden] = useState(true);
 
-  const { email, password } = userCredentials;
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    signInStart(email, password);
-  };
-
-  const handleChange = (e) => {
-    const { value, name } = e.target;
-    setCredentials({
-      ...userCredentials,
-      [name]: value,
-    });
-  };
-
-  return (
+  const toggleRegistrationHidden = () =>
+    setRegistrationHidden(!registrationHidden);
+  return isMobile ? (
     <LoginPageContainer>
-      <LoginPageHeader>Zaloguj się:</LoginPageHeader>
-      <LoginPageForm onSubmit={handleSubmit}>
-        <FormInput
-          name="email"
-          type="email"
-          value={email}
-          onChange={handleChange}
-          label="email"
-          required
-        />
-        <FormInput
-          name="password"
-          type="password"
-          value={password}
-          onChange={handleChange}
-          label="hasło"
-          required
-        />
-        {loginError && loginError.code && (
-          <LoginPageWarn>{loginError.message}</LoginPageWarn>
-        )}
-        <CustomButton type="submit">Zaloguj</CustomButton>
-      </LoginPageForm>
+      {registrationHidden ? (
+        <Login toggleRegistration={toggleRegistrationHidden} />
+      ) : (
+        <SignUp toggleRegistration={toggleRegistrationHidden} />
+      )}
+    </LoginPageContainer>
+  ) : (
+    <LoginPageContainer>
+      <Login />
+      <SignUp />
     </LoginPageContainer>
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  signInStart: (email, password) => dispatch(signInStart({ email, password })),
-});
-
-const mapStateToProps = createStructuredSelector({
-  loginError: selectLoginError,
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);
+export default LoginPage;

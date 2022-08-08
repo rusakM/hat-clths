@@ -4,14 +4,14 @@ const subColor = "grey";
 const mainColor = "black";
 
 const shrinkLabelStyles = css`
-  top: -14px;
+  top: -5px;
   font-size: 12px;
   color: ${mainColor};
 `;
 
 export const GroupContainer = styled.div`
   position: relative;
-  margin: 15px 0;
+  margin: 0;
   input[type="password"] {
     letter-spacing: 0.3em;
   }
@@ -28,7 +28,7 @@ export const FormInputContainer = styled.input`
   border: none;
   border-radius: 0;
   border-bottom: 1px solid ${subColor};
-  margin: 25px 0;
+  margin: 20px 0;
   &:focus {
     outline: none;
   }

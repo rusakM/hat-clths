@@ -6,20 +6,6 @@ export const LoginPageContainer = styled.div`
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
-  flex-direction: column;
-`;
-
-export const LoginPageHeader = styled.h1`
-  font-weight: 900;
-`;
-
-export const LoginPageForm = styled.form`
-  padding: 1em;
-  display: flex;
-  flex-direction: column;
-`;
-
-export const LoginPageWarn = styled.p`
-  color: #ff0000;
+  align-items: flex-start;
+  flex-direction: row;
 `;

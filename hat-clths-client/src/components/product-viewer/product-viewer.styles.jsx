@@ -127,10 +127,11 @@ export const ReviewsContainer = styled.div`
   width: 100%;
   display: block;
   padding: 1em;
-  margin-left: 2em;
+  padding-left: 3em;
 
   @media (max-width: 480px) {
     margin: 0;
+    padding-left: 1em;
   }
 `;
 
