@@ -7,7 +7,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import FormInput from "../../components/form-input/form-input.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
 
-import { signInStart } from "../../redux/user/user.actions";
+import { signInStart, googleSignInStart } from "../../redux/user/user.actions";
 import { selectLoginError } from "../../redux/user/user.selectors";
 
 import {
@@ -19,7 +19,12 @@ import {
   ButtonsContainer,
 } from "./login.styles";
 
-const Login = ({ signInStart, loginError, toggleRegistration }) => {
+const Login = ({
+  signInStart,
+  googleSignInStart,
+  loginError,
+  toggleRegistration,
+}) => {
   const isMobile = useMediaQuery({
     maxWidth: 480,
   });
@@ -31,7 +36,6 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
   const [isGoogleSignInOpened, setGoogleSignIn] = useState(false);
 
   const { email, password } = userCredentials;
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +52,7 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
 
   const openGoogleSignIn = (event) => {
     event.preventDefault();
-    setGoogleSignIn(!isGoogleSignInOpened)
+    setGoogleSignIn(!isGoogleSignInOpened);
   };
 
   return (
@@ -76,7 +80,13 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
         )}
         <ButtonsContainer className={isMobile ? "column" : "row"}>
           <CustomButton type="submit">Zaloguj</CustomButton>
-          <CustomButton isGoogleSignIn onClick={openGoogleSignIn}>Logowanie Google</CustomButton>
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              googleSignInStart(credentialResponse);
+            }}
+            text="signin"
+            theme="filled_black"
+          />
         </ButtonsContainer>
       </LoginForm>
       {isMobile && (
@@ -84,18 +94,13 @@ const Login = ({ signInStart, loginError, toggleRegistration }) => {
           Rejestracja nowego użytkownika
         </Register>
       )}
-      { isGoogleSignInOpened && <GoogleLogin onSuccess={credentialResponse => {
-    console.log(credentialResponse);
-  }}
-  onError={() => {
-    console.log('Login Failed');
-  }}/> }
     </LoginContainer>
   );
 };
 
 const mapDispatchToProps = (dispatch) => ({
   signInStart: (email, password) => dispatch(signInStart({ email, password })),
+  googleSignInStart: (token) => dispatch(googleSignInStart(token)),
 });
 
 const mapStateToProps = createStructuredSelector({

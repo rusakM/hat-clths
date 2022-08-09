@@ -1,7 +1,7 @@
 import axios from "axios";
 import validator from "validator";
 
-import { getData, sendData, AppError } from "./api.functions";
+import { getData, AppError } from "./api.functions";
 
 export const signInWithEmailAndPassword = async (email, password) => {
   try {
@@ -22,6 +22,20 @@ export const signInWithEmailAndPassword = async (email, password) => {
       throw new AppError("Nieprawidłowy login lub hasło", 401);
     }
     throw error;
+  }
+};
+
+export const loginWithGoogle = async (token) => {
+  try {
+    const userData = await axios({
+      method: "POST",
+      url: "/api/users/googleLogin",
+      data: token,
+    });
+
+    return userData.data.data.user;
+  } catch (error) {
+    throw new AppError("Nie można zalogować", 400);
   }
 };
 

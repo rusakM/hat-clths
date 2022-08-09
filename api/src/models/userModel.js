@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isGoogleUser: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },

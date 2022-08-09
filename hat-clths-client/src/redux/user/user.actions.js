@@ -46,3 +46,18 @@ export const signUpFailure = (error) => ({
   type: UserActionTypes.SIGN_UP_FAILURE,
   payload: error,
 });
+
+export const googleSignInStart = (credentials) => ({
+  type: UserActionTypes.GOOGLE_SIGN_IN_START,
+  payload: credentials,
+});
+
+export const googleSignInSuccess = (user) => ({
+  type: UserActionTypes.GOOGLE_SIGN_IN_SUCCESS,
+  payload: user,
+});
+
+export const googleSignInFailure = (error) => ({
+  type: UserActionTypes.GOOGLE_SIGN_IN_FAILURE,
+  payload: error,
+});

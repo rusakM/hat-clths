@@ -1,6 +1,7 @@
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const jose = require("jose");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
@@ -63,9 +64,36 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
-exports.googleLogin = (req, res, next) => {
-  res.status(200);
-};
+exports.googleLogin = catchAsync(async (req, res, next) => {
+  const { credential } = req.body;
+  const { email, name, exp } = await jose.decodeJwt(credential);
+
+  if (!email || !name || !exp) {
+    return new AppError("Nie udało się zalogować", 400);
+  }
+
+  const now = Date.now() * 1;
+  const expTime = `${exp}000` * 1;
+
+  if (now > expTime) {
+    return next(new AppError("Przekroczono czas logowania", 400));
+  }
+
+  let user = await User.findOne({ email });
+  const password = process.env.JWT_SECRET;
+
+  if (!user) {
+    user = await User.create({
+      email,
+      name,
+      isGoogleUser: true,
+      password,
+      passwordConfirm: password,
+    });
+  }
+
+  createSendToken(user, 200, req, res);
+});
 
 exports.loginAdmin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
