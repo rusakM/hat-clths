@@ -75,13 +75,8 @@ productPreviewSchema.pre(/^find/, function (next) {
     return next();
   }
   this.populate({
-    path: "products",
-    select: "-__v",
-    options: { _recursed: true },
-  });
-  this.populate({
     path: "category",
-    select: "-__v",
+    select: "-__v -name -picture -gender -isDeactivated",
     options: { _recursed: true },
   });
 
@@ -92,6 +87,11 @@ productPreviewSchema.pre(/^findOne/, function (next) {
   if (this.options._recursed) {
     return next();
   }
+  this.populate({
+    path: "products",
+    select: "-__v",
+    options: { _recursed: true },
+  });
   this.populate({
     path: "reviews",
     select: "-__v",

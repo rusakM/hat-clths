@@ -100,9 +100,7 @@ const MainPage = ({ fetchTopProducts }) => {
               >
                 &nbsp;
               </div>
-              <CustomButton className="absolute-position small-button">
-                NOWOŚCI
-              </CustomButton>
+              <CustomButton className="absolute-position">NOWOŚCI</CustomButton>
             </Tile>
             <Tile width={20} unit="vw" link="/products/for-her">
               <div

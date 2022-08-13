@@ -8,6 +8,7 @@ import { createStructuredSelector } from "reselect";
 import { selectOneProduct } from "../../redux/products/product.selectors";
 import { selectCurrentUser } from "../../redux/user/user.selectors";
 import { sendReviewStart } from "../../redux/products/product.actions";
+import { addItem } from "../../redux/cart/cart.actions";
 
 import CustomButton from "../custom-button/custom-button.component";
 import ThumbnailsList from "../thumbnails-list/thumbnails-list.component";
@@ -17,6 +18,7 @@ import Stars from "../stars/stars.component";
 
 import formatPrice from "../../utils/formatPrice";
 import calculateAverageRating from "./calculateAverage";
+import createProductToCart from "./createProductToCart";
 import PRODUCT_SIZES from "../../utils/productSizes";
 
 import {
@@ -38,7 +40,7 @@ import {
 
 import "./product-viewer.styles.css";
 
-const ProductViewer = ({ product, currentUser, sendReview }) => {
+const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
   if (!product) {
     product = {};
   }
@@ -76,7 +78,9 @@ const ProductViewer = ({ product, currentUser, sendReview }) => {
   }
 
   const [photoIndex, setPhotoIndex] = useState(defaultPhoto);
-  const [selectedSize, setSize] = useState(null);
+  const [selectedSize, setSize] = useState(
+    availableSizesList.length > 0 ? availableSizesList[0].value : null
+  );
   const [showedReviews, setShowedReviews] = useState(10);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
@@ -109,6 +113,10 @@ const ProductViewer = ({ product, currentUser, sendReview }) => {
   const sendReviewTrigger = () => {
     sendReview({ review: reviewText, rating: reviewRating }, _id);
     resetReview();
+  };
+
+  const addToCart = () => {
+    addItem(createProductToCart(product, selectedSize));
   };
 
   return (
@@ -156,7 +164,7 @@ const ProductViewer = ({ product, currentUser, sendReview }) => {
                 id="select-size"
               />
             </div>
-            <CustomButton className="cart-button">
+            <CustomButton className="cart-button" onClick={addToCart}>
               Dodaj do koszyka
             </CustomButton>
           </SizesContainer>
@@ -217,6 +225,7 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = (dispatch) => ({
   sendReview: (reviewData, productId) =>
     dispatch(sendReviewStart(reviewData, productId)),
+  addItem: (productData) => dispatch(addItem(productData)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductViewer);

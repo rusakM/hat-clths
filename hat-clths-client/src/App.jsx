@@ -23,6 +23,8 @@ const ProductPage = lazy(() =>
 
 const LoginPage = lazy(() => import("./pages/login-page/login-page.component"));
 
+const Checkout = lazy(() => import("./pages/checkout/checkout.component"));
+
 const App = () => {
   const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
@@ -50,6 +52,7 @@ const App = () => {
               path="/products/:category/:productId"
               element={<ProductPage />}
             />
+            <Route element={<Checkout />} path="/cart" />
           </Routes>
         </Suspense>
       </RootContainer>
