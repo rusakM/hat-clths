@@ -25,6 +25,10 @@ const LoginPage = lazy(() => import("./pages/login-page/login-page.component"));
 
 const Checkout = lazy(() => import("./pages/checkout/checkout.component"));
 
+const OrderSummary = lazy(() =>
+  import("./pages/order-summary-page/order-summery-page.component")
+);
+
 const App = () => {
   const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
@@ -53,6 +57,7 @@ const App = () => {
               element={<ProductPage />}
             />
             <Route element={<Checkout />} path="/cart" />
+            <Route element={<OrderSummary />} path="/order-summary" />
           </Routes>
         </Suspense>
       </RootContainer>

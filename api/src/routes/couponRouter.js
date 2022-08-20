@@ -14,6 +14,7 @@ router
     couponController.convertExpirationDaysToTime,
     couponController.createCoupon
   );
+router.get("/code/:code", couponController.getByCode);
 
 router
   .route("/:id")

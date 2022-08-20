@@ -16,4 +16,6 @@ const DELIVERY_TYPES = {
   },
 };
 
+export const paymentWithDelivery = 5;
+
 export default DELIVERY_TYPES;

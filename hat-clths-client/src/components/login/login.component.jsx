@@ -33,8 +33,6 @@ const Login = ({
     password: "",
   });
 
-  const [isGoogleSignInOpened, setGoogleSignIn] = useState(false);
-
   const { email, password } = userCredentials;
 
   const handleSubmit = async (e) => {
@@ -48,11 +46,6 @@ const Login = ({
       ...userCredentials,
       [name]: value,
     });
-  };
-
-  const openGoogleSignIn = (event) => {
-    event.preventDefault();
-    setGoogleSignIn(!isGoogleSignInOpened);
   };
 
   return (

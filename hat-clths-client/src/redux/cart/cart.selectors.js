@@ -24,3 +24,13 @@ export const selectCartTotal = createSelector([selectCartItems], (cartItems) =>
     0
   )
 );
+
+export const selectPaymentMethod = createSelector(
+  [selectCart],
+  (cart) => cart.paymentMethod
+);
+
+export const selectDeliveryType = createSelector(
+  [selectCart],
+  (cart) => cart.deliveryType
+);

@@ -69,6 +69,10 @@ a {
   padding: 1em;
 }
 
+.bold-border {
+  border-width: 2px;
+}
+
 @media (max-width: 480px) {
   .logo {
     width: 40px;

@@ -1,18 +1,28 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
+import { Link } from "react-router-dom";
 
 import CheckoutItem from "../../components/checkout-item/checkout-item.component";
 import Tile from "../../components/tile/tile.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
 import FormInput from "../../components/form-input/form-input.component";
 import formatPrice from "../../utils/formatPrice";
-import DELIVERY_TYPES from "../../utils/deliveryTypes";
+import DELIVERY_TYPES, { paymentWithDelivery } from "../../utils/deliveryTypes";
 
 import {
   selectCartItems,
   selectCartTotal,
+  selectDeliveryType,
+  selectPaymentMethod,
 } from "../../redux/cart/cart.selectors";
+
+import { selectCurrentUser } from "../../redux/user/user.selectors";
+
+import {
+  setPaymentMethod,
+  setDeliveryType,
+} from "../../redux/cart/cart.actions";
 
 import {
   CheckoutPageContainer,
@@ -24,26 +34,29 @@ import {
 
 import "../main-page/main-page.styles.css";
 
-const CheckoutPage = ({ cartItems, total }) => {
-  const [discount, setDiscount] = useState(0);
-  const [deliveryCost, setDeliveryCost] = useState(
-    DELIVERY_TYPES.COURIER.price
-  );
+const CheckoutPage = ({
+  cartItems,
+  total,
+  paymentMethod,
+  deliveryType,
+  setDeliveryType,
+  setPaymentMethod,
+  currentUser,
+}) => {
+  const discount = 0;
+  const deliveryCost =
+    deliveryType.price + (paymentMethod ? 0 : paymentWithDelivery);
   const [deliverySelected, setDelivery] = useState(0);
-  const [isPaymentInAdvance, setPaymentInAdvance] = useState(true);
   const [coupon, setCoupon] = useState("");
 
-  const selectDeliveryType = (type, price) => {
-    const additionalCost = isPaymentInAdvance ? 0 : 5;
-    setDelivery(type);
-    setDeliveryCost(price + additionalCost);
+  const selectDeliveryType = (type, index) => {
+    setDelivery(index);
+    setDeliveryType(type);
   };
 
   const togglePaymentInAdvance = (event) => {
     const { checked } = event.target;
-    const additionalCost = !checked ? -5 : 5;
-    setDeliveryCost(deliveryCost + additionalCost);
-    setPaymentInAdvance(!checked);
+    setPaymentMethod(!checked);
   };
 
   const handleCouponChange = (event) => {
@@ -53,9 +66,13 @@ const CheckoutPage = ({ cartItems, total }) => {
   return (
     <CheckoutPageContainer>
       <CheckoutPageList>
-        {cartItems.map((cartItem) => (
-          <CheckoutItem key={cartItem.id} product={cartItem} />
-        ))}
+        {cartItems.length > 0 ? (
+          cartItems.map((cartItem) => (
+            <CheckoutItem key={cartItem.id} product={cartItem} />
+          ))
+        ) : (
+          <h3>Twój koszyk jest pusty</h3>
+        )}
       </CheckoutPageList>
       <CheckoutSummary>
         <SummaryRow>
@@ -90,7 +107,7 @@ const CheckoutPage = ({ cartItems, total }) => {
               key={index}
             >
               <div
-                onClick={() => selectDeliveryType(index, type.price)}
+                onClick={() => selectDeliveryType(type, index)}
                 style={{
                   backgroundImage: `url("/uploads/delivery/${type.photo}")`,
                   padding: "30px",
@@ -107,28 +124,33 @@ const CheckoutPage = ({ cartItems, total }) => {
               type="checkbox"
               name="paymentInAdvance"
               id="paymentInAdvance"
-              value={!isPaymentInAdvance}
+              value={!paymentMethod}
+              checked={!paymentMethod}
               onChange={togglePaymentInAdvance}
             />
             <label htmlFor="paymentInAdvance" style={{ padding: "5px" }}>
-              Płatność przy odbiorze: +{formatPrice(5)}
+              Płatność przy odbiorze: +{formatPrice(paymentWithDelivery)}
             </label>
           </div>
         </SummaryRow>
-        <SummaryRow style={{ paddingTop: "0.5em", alignItems: "center" }}>
-          <FormInput
-            label="kod rabatowy"
-            value={coupon}
-            onChange={handleCouponChange}
-            style={{
-              width: "100%",
-              padding: "0 1em",
-            }}
-            wide
-          />
-          <CustomButton className="small-button">Zastosuj</CustomButton>
-        </SummaryRow>
-        <CustomButton>Przejdź do podsumowania</CustomButton>
+        {currentUser && (
+          <SummaryRow style={{ paddingTop: "0.5em", alignItems: "center" }}>
+            <FormInput
+              label="kod rabatowy"
+              value={coupon}
+              onChange={handleCouponChange}
+              style={{
+                width: "100%",
+                padding: "0 1em",
+              }}
+              wide
+            />
+            <CustomButton className="small-button">Zastosuj</CustomButton>
+          </SummaryRow>
+        )}
+        <Link to="/order-summary">
+          <CustomButton>Przejdź do podsumowania</CustomButton>
+        </Link>
       </CheckoutSummary>
     </CheckoutPageContainer>
   );
@@ -137,6 +159,15 @@ const CheckoutPage = ({ cartItems, total }) => {
 const mapStateToProps = createStructuredSelector({
   cartItems: selectCartItems,
   total: selectCartTotal,
+  paymentMethod: selectPaymentMethod,
+  deliveryType: selectDeliveryType,
+  currentUser: selectCurrentUser,
 });
 
-export default connect(mapStateToProps)(CheckoutPage);
+const mapDispatchToProps = (dispatch) => ({
+  setDeliveryType: (deliveryType) => dispatch(setDeliveryType(deliveryType)),
+  setPaymentMethod: (paymentMethod) =>
+    dispatch(setPaymentMethod(paymentMethod)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(CheckoutPage);

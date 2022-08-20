@@ -7,6 +7,7 @@ import categoryReducer from "./category/category.reducer";
 import productReducer from "./products/product.reducer";
 import menuReducer from "./mobile-menu/menu.reducer";
 import cartReducer from "./cart/cart.reducer";
+import addressReducer from "./address/address.reducer";
 
 const persistConfig = {
   key: "root",
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   products: productReducer,
   mobileMenu: menuReducer,
   cart: cartReducer,
+  address: addressReducer,
 });
 
 export default persistReducer(persistConfig, rootReducer);

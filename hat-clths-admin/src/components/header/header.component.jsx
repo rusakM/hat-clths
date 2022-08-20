@@ -4,10 +4,7 @@ import { createStructuredSelector } from "reselect";
 
 import { ReactComponent as Logo } from "../../assets/top-hat.svg";
 
-import {
-  selectCurrentUser,
-  selectLoginError,
-} from "../../redux/user/user.selectors";
+import { selectCurrentUser } from "../../redux/user/user.selectors";
 import { signOutStart } from "../../redux/user/user.actions";
 
 import {
@@ -19,7 +16,7 @@ import {
   OptionsLink,
 } from "./header.styles";
 
-const Header = ({ currentUser, loginError, signOutStart }) => (
+const Header = ({ currentUser, signOutStart }) => (
   <HeaderContainer>
     <LogoContainer>
       <LogoIcon to="/">
@@ -46,7 +43,6 @@ const Header = ({ currentUser, loginError, signOutStart }) => (
 
 const mapStateToProps = createStructuredSelector({
   currentUser: selectCurrentUser,
-  loginError: selectLoginError,
 });
 
 const mapDispatchToProps = (dispatch) => ({
