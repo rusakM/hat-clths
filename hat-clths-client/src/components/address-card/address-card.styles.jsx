@@ -7,6 +7,7 @@ export const CardContainer = styled.div`
   display: flex;
   flex-direction: column;
   border: 1px solid #000;
+  cursor: pointer;
 
   &:hover {
     border-width: 2px;

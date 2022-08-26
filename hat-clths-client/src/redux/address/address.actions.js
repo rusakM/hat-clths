@@ -14,14 +14,14 @@ export const fetchAddressFailure = (error) => ({
   payload: error,
 });
 
-export const createAddress = (addressData) => ({
+export const createAddress = (addressData, user) => ({
   type: addressTypes.CREATE_ADDRESS,
-  payload: addressData,
+  payload: { ...addressData, user },
 });
 
-export const createInvoice = (invoiceData, address) => ({
+export const createInvoice = (invoiceData) => ({
   type: addressTypes.CREATE_INVOICE,
-  payload: { ...invoiceData, address },
+  payload: { ...invoiceData },
 });
 
 export const selectInvoice = (invoice) => ({
@@ -30,6 +30,15 @@ export const selectInvoice = (invoice) => ({
 });
 
 export const selectAddress = (address) => ({
-  type: addressTypes.SEELCT_ADDRESS,
+  type: addressTypes.SELECT_ADDRESS,
   payload: address,
+});
+
+export const selectInvoiceAddress = (address) => ({
+  type: addressTypes.SELECT_INVOICE_ADDRESS,
+  payload: address,
+});
+
+export const activateInvoice = () => ({
+  type: addressTypes.ACTIVATE_INVOICE,
 });

@@ -10,23 +10,24 @@ import {
 import { useMediaQuery } from "react-responsive";
 
 import AddressCard from "../address-card/address-card.component";
-import { formatAddress } from "../../utils/addressFormatter";
+import { formatInvoice } from "../../utils/addressFormatter";
 
-import { selectAddressList } from "../../redux/address/address.selectors";
+import { selectAddressForInvoice } from "../../redux/address/address.selectors";
 
-import { ListContainer, CardsList } from "./address-card-list.styles";
+import { ListContainer, CardsList } from "./invoice-card-list.styles";
 
-const AddressCardList = ({ addressList, selectAddress, currentAddress }) => {
+const InvoiceCardList = ({ invoiceAddress, selectInvoice, currentInvoice }) => {
   const isMobile = useMediaQuery({
     maxWidth: 480,
   });
   const defaultLength = 3;
-  const buttonsDisplayed = !isMobile && addressList.length > defaultLength;
+  const invoiceList = invoiceAddress.invoice;
+  const buttonsDisplayed = !isMobile && invoiceList.length > defaultLength;
 
   const [visibleCards, setVisibleCards] = useState([0, 1, 2]);
 
   const swipeCards = (dest = false) => {
-    if (addressList.length <= defaultLength) {
+    if (invoiceList.length <= defaultLength) {
       return;
     }
     const increment = dest ? 1 : -1;
@@ -35,17 +36,13 @@ const AddressCardList = ({ addressList, selectAddress, currentAddress }) => {
       visibleCards.map((card) => {
         let num = card + increment;
         if (num < 0) {
-          num = addressList.length - 1;
-        } else if (num === addressList.length) {
+          num = invoiceList.length - 1;
+        } else if (num === invoiceList.length) {
           num = 0;
         }
         return num;
       })
     );
-  };
-
-  const selectCard = (address) => {
-    selectAddress(address);
   };
 
   return (
@@ -59,24 +56,26 @@ const AddressCardList = ({ addressList, selectAddress, currentAddress }) => {
         {buttonsDisplayed
           ? visibleCards.map((card) => (
               <AddressCard
-                rows={formatAddress(addressList[card])}
+                rows={formatInvoice(invoiceList[card])}
                 key={card}
-                eventHandler={() => selectCard(addressList[card])}
+                eventHandler={() => selectInvoice(invoiceList[card])}
                 additionalClass={
-                  currentAddress &&
-                  addressList[card].id === currentAddress.id &&
+                  currentInvoice &&
+                  invoiceList[card].id === currentInvoice.id &&
+                  currentInvoice.address === invoiceAddress.id &&
                   "bold-border"
                 }
               />
             ))
-          : addressList.map((address) => (
+          : invoiceList.map((invoice) => (
               <AddressCard
-                rows={formatAddress(address)}
-                key={address.id}
-                eventHandler={() => selectCard(address)}
+                rows={formatInvoice(invoice)}
+                key={invoice.id}
+                eventHandler={() => selectInvoice(invoice)}
                 additionalClass={
-                  currentAddress &&
-                  address.id === currentAddress.id &&
+                  currentInvoice &&
+                  invoice.id === currentInvoice.id &&
+                  currentInvoice.address === invoiceAddress.id &&
                   "bold-border"
                 }
               />
@@ -92,7 +91,7 @@ const AddressCardList = ({ addressList, selectAddress, currentAddress }) => {
 };
 
 const mapStateToProps = createStructuredSelector({
-  addressList: selectAddressList,
+  invoiceAddress: selectAddressForInvoice,
 });
 
-export default connect(mapStateToProps)(AddressCardList);
+export default connect(mapStateToProps)(InvoiceCardList);

@@ -11,7 +11,8 @@ export const formatAddress = (address) => {
 
   const streetRow = `ul. ${street} ${houseNumber} ${
     flatNumber && `, m. ${flatNumber}`
-  }}`;
+  }`;
+
   return [name, email, streetRow, `${zipCode} ${city}`, phoneNumber];
 };
 

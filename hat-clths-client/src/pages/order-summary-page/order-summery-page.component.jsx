@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,6 +6,10 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 
 import OrderList from "../../components/order-list/order-list.component";
 import OrderSummary from "../../components/order-summary/order-summary.component";
+import Address from "../../components/address/address.component";
+import Invoice from "../../components/invoice/invoice.component";
+
+import { validateBooking } from "./order.validator";
 
 import { fetchAddressStart } from "../../redux/address/address.actions";
 import {
@@ -14,22 +18,49 @@ import {
   selectDeliveryType,
   selectPaymentMethod,
 } from "../../redux/cart/cart.selectors";
+
+import {
+  selectCurrentAddress,
+  selectCurrentInvoice,
+  selectAddressForInvoice,
+  selectIsWithInvoice,
+} from "../../redux/address/address.selectors";
 import {
   PageConstainer,
   ContainersRow,
   BackBtn,
 } from "./order-summary-page.styles";
+import CustomButton from "../../components/custom-button/custom-button.component";
 
 const OrderSummaryPage = ({
   cartItems,
-  total,
   deliveryType,
   paymentMethod,
+  deliveryAddress,
+  invoice,
+  invoiceAddress,
+  isWithInvoice,
   fetchAddressStart,
 }) => {
   useEffect(() => {
     fetchAddressStart();
   }, [fetchAddressStart]);
+
+  const createBooking = () => {
+    const booking = {
+      products: cartItems,
+      deliveryType,
+      paymentInAdvance: paymentMethod,
+      address: deliveryAddress,
+      invoice,
+      invoiceAddress,
+      isWithInvoice,
+    };
+
+    validateBooking(booking);
+
+    console.log(booking);
+  };
 
   return (
     <PageConstainer>
@@ -41,6 +72,13 @@ const OrderSummaryPage = ({
         <OrderList productsList={cartItems} />
         <OrderSummary />
       </ContainersRow>
+      <ContainersRow>
+        <Address />
+        <Invoice />
+      </ContainersRow>
+      <div className="centered-div" style={{ padding: "1em" }}>
+        <CustomButton onClick={createBooking}>Złóż zamówienie</CustomButton>
+      </div>
     </PageConstainer>
   );
 };
@@ -50,6 +88,10 @@ const mapStateToProps = createStructuredSelector({
   total: selectCartTotal,
   deliveryType: selectDeliveryType,
   paymentMethod: selectPaymentMethod,
+  deliveryAddress: selectCurrentAddress,
+  invoice: selectCurrentInvoice,
+  invoiceAddress: selectAddressForInvoice,
+  isWithInvoice: selectIsWithInvoice,
 });
 
 const mapDispatchToProps = (dispatch) => ({

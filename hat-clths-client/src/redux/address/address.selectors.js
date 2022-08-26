@@ -26,3 +26,13 @@ export const selectIsAddressFetching = createSelector(
   [selectAddress],
   (address) => address.isFetching
 );
+
+export const selectAddressForInvoice = createSelector(
+  [selectAddress],
+  (address) => address.addressForInvoice
+);
+
+export const selectIsWithInvoice = createSelector(
+  [selectAddress],
+  (address) => address.orderWithInvoice
+);
