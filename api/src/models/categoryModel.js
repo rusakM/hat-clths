@@ -7,11 +7,6 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: [true, "Nie podano nazwy kategorii"],
     },
-    description: String,
-    picture: {
-      type: String,
-      default: "default.png",
-    },
     gender: {
       //false - woman, true - man
       type: Boolean,

@@ -4,6 +4,8 @@ const BookingStatus = require("./bookingStatusModel");
 const Product = require("./productModel");
 const Coupon = require("./couponModel");
 const User = require("./userModel");
+const delivery = require("../utils/deliveryTypes");
+const bookingStatuses = require("../utils/bookingStatuses");
 
 const bookingSchema = new mongoose.Schema(
   {
@@ -12,27 +14,24 @@ const bookingSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Zamówienie musi należeć do użytkownika"],
     },
-    products: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: [true, "Zamówienie musi posiadać prznajmniej jeden produkt"],
-      },
-    ],
     address: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Address",
       required: [true, "Zamówienie musi posiadać adres dostawy"],
     },
     paymentMethod: {
-      type: String,
-      enum: ["przy odbiorze", "online"],
-      default: "online",
+      type: Boolean,
+      default: true,
     },
     deliveryType: {
       type: String,
-      enum: ["kurier", "przesyłka pocztowa", "paczkomat"],
+      enum: Object.keys(delivery.DELIVERY_TYPES),
       required: [true, "Nie wybrano sposobu dostawy"],
+    },
+    deliveryCost: {
+      type: Number,
+      min: 0,
+      default: 14.99,
     },
     paid: {
       type: Boolean,
@@ -56,6 +55,7 @@ const bookingSchema = new mongoose.Schema(
     discount: {
       type: Number,
       min: 0,
+      default: 0,
     },
     coupon: {
       type: mongoose.Schema.Types.ObjectId,
@@ -81,27 +81,14 @@ bookingSchema.virtual("history", {
   localField: "_id",
 });
 
+bookingSchema.virtual("products", {
+  ref: "ProductBought",
+  foreignField: "booking",
+  localField: "_id",
+});
+
 bookingSchema.pre("save", async function (next) {
   if (this.isNew) {
-    const productsPromises = this.products.map(async (id) =>
-      Product.findById(id)
-    );
-
-    const products = await await Promise.all(productsPromises);
-    let price = products
-      .map(({ price }) => price)
-      .reduce((total, val) => total + val);
-    this.price = Math.round(price * 100) / 100;
-
-    if (this.coupon) {
-      const coupon = await Coupon.findById(this.coupon);
-      this.discount = coupon.discount;
-      price -= (coupon.discount / 100) * price;
-    }
-
-    price = Math.round(price * 100) / 100;
-    this.total = price;
-
     const time = Date.now();
     this.createdAt = time;
 
@@ -115,41 +102,47 @@ bookingSchema.pre("save", async function (next) {
 });
 
 bookingSchema.pre(/^find/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
+
   this.populate({
     path: "history",
     select: "-__v",
+    options: { _recursed: true },
   }).populate({
     path: "user",
     select: "name surname email isGoogleUser",
+    options: { _recursed: true },
   });
 
   next();
 });
 
 bookingSchema.pre(/^findOne/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
+
   this.populate({
-    path: "user",
-    select: "name surname email isGoogleUser",
+    path: "products",
+    select: "-__v",
+    options: { _recursed: true },
   })
-    .populate({
-      path: "products",
-      select: "-__v",
-    })
     .populate({
       path: "address",
       select: "-__v",
+      options: { _recursed: true },
     })
     .populate({
       path: "coupon",
       select: "-__v",
+      options: { _recursed: true },
     })
     .populate({
       path: "invoice",
       select: "-__v",
-    })
-    .populate({
-      path: "history",
-      select: "-__v",
+      options: { _recursed: true },
     });
 
   next();
@@ -160,41 +153,12 @@ bookingSchema.post("save", async function (doc, next) {
     return next();
   }
 
-  const productsPromises = doc.products.map(async (id) => Product.findById(id));
-
-  const products = await await Promise.all(productsPromises);
-  const productsQuantities = doc.products.reduce((total, val) => {
-    return total[val] ? ++total[val] : (total[val] = 1), total;
-  }, {});
-
-  for (const id in productsQuantities) {
-    let product;
-
-    for (let i = 0; i < products.length; i++) {
-      if (products[i]._id === id) {
-        product = products[i];
-        break;
-      }
-    }
-
-    const productBoughtToInsert = {
-      product: id,
-      user: doc.user,
-      category: product.category,
-      booking: doc._id,
-      productPreview: product.productPreview,
-      quantity: productsQuantities[id],
-    };
-
-    console.log(productBoughtToInsert);
-
-    if (!doc.paid && !doc.isFinished) {
-      const booking = doc._id;
-      await BookingStatus.create({
-        booking,
-        description: "Utworzenie zamówienia",
-      });
-    }
+  if (!doc.paid && !doc.isFinished) {
+    const booking = doc._id;
+    await BookingStatus.create({
+      booking,
+      description: bookingStatuses.create,
+    });
   }
 
   next();

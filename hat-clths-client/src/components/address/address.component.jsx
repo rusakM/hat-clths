@@ -56,7 +56,7 @@ const Address = ({
 
   const createAddress = (event) => {
     event.preventDefault();
-    const user = currentUser ? currentUser : userData;
+    const user = currentUser ? currentUser : { ...userData, isNew: true };
     createNewAddress(addressData, user);
   };
 

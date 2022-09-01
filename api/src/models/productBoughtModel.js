@@ -34,6 +34,8 @@ const productBoughtSchema = new mongoose.Schema(
   }
 );
 
+productBoughtSchema.index({ product: 1 });
+
 productBoughtSchema.pre("save", function (next) {
   if (this.isNew) {
     this.createdAt = new Date(Date.now());
@@ -42,6 +44,28 @@ productBoughtSchema.pre("save", function (next) {
   next();
 });
 
-productBoughtSchema.index({ product: 1 });
+productBoughtSchema.pre(/^findOne/, function (next) {
+  if (this.options._recursed) {
+    return next();
+  }
+
+  this.populate({
+    path: "product",
+    select: "_id id name price imageCover",
+    options: { _recursed: true },
+  })
+    .populate({
+      path: "productPreview",
+      select: "_id id name price size barcode",
+      options: { _recursed: true },
+    })
+    .populate({
+      path: "category",
+      select: "-__v",
+      options: { _recursed: true },
+    });
+
+  next();
+});
 
 module.exports = mongoose.model("ProductBought", productBoughtSchema);

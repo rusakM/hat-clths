@@ -48,10 +48,13 @@ const OrderSummaryPage = ({
 
   const createBooking = () => {
     const booking = {
-      products: cartItems,
-      deliveryType,
-      paymentInAdvance: paymentMethod,
       address: deliveryAddress,
+      products: cartItems,
+      user: deliveryAddress.user,
+      booking: {
+        deliveryType,
+        paymentInAdvance: paymentMethod,
+      },
       invoice,
       invoiceAddress,
       isWithInvoice,

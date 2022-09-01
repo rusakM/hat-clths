@@ -7,7 +7,7 @@ export const validateBooking = (data) => {
   if (!data.address) {
     throw new AppError("Nie wybrano adresu dostawy", 404);
   }
-  if (!data.deliveryType) {
+  if (!data.booking.deliveryType) {
     throw new AppError("Nie wybrano rodzaju dostawy", 404);
   }
   if (data.isWithInvoice) {
