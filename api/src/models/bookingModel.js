@@ -20,6 +20,7 @@ const bookingSchema = new mongoose.Schema(
       required: [true, "Zamówienie musi posiadać adres dostawy"],
     },
     paymentMethod: {
+      //true means payment online, false means payment in advance
       type: Boolean,
       default: true,
     },
@@ -126,8 +127,25 @@ bookingSchema.pre(/^findOne/, function (next) {
 
   this.populate({
     path: "products",
-    select: "-__v",
+    select: "-__v -user",
     options: { _recursed: true },
+    populate: [
+      {
+        path: "product",
+        select: "_id name size",
+        options: { _recursed: true },
+      },
+      {
+        path: "category",
+        select: "-__v",
+        options: { _recursed: true },
+      },
+      {
+        path: "productPreview",
+        select: "_id price name slug imageCover",
+        options: { _recursed: true },
+      },
+    ],
   })
     .populate({
       path: "address",

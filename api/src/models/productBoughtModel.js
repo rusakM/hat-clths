@@ -26,6 +26,7 @@ const productBoughtSchema = new mongoose.Schema(
       type: Number,
       min: 1,
     },
+    price: Number,
     createdAt: Date,
   },
   {

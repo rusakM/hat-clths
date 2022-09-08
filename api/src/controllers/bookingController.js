@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 const Stripe = require("stripe");
+const md5 = require("md5");
 
 const Booking = require("../models/bookingModel");
 const User = require("../models/userModel");
@@ -38,36 +39,318 @@ exports.getBooking = factory.getOne(Booking);
 // 1) user for booking
 
 exports.userVerification = catchAsync(async (req, res, next) => {
-  const { user } = req.body.user;
-
+  const { user } = req.body;
   if (!user || !user.email) {
     return next(new AppError("Brak danych o użytkowniku", 404));
   }
 
   const { name, email, isNew } = user;
-
   let userFromDb = await User.findOne({ email });
 
-  if (!userFromDb && !user.isNew) {
+  if (!userFromDb && !isNew) {
     return next(new AppError("Brak użytkownika w bazie danych", 404));
+  }
+  let accessToken;
+  if (!userFromDb) {
+    userFromDb = await User.create({
+      name,
+      email,
+      isActive: false,
+      password: process.env.JWT_SECRET,
+      passwordConfirm: process.env.JWT_SECRET,
+    });
+
+    accessToken = md5(`${process.env.JWT_SECRET}${userFromDb._id}`);
+  }
+
+  userFromDb = userFromDb.toObject();
+  req.booking = {
+    user: userFromDb._id,
+  };
+
+  if (accessToken) {
+    req.booking.accessToken = accessToken;
+  }
+
+  console.log("1. user ok");
+
+  next();
+});
+
+// 2 address for booking
+
+// function checks if an address exists, create new id doesn't and gives this id
+const addressProcessing = async (address, user) => {
+  if (!address || (!address.id && !address.isNew)) {
+    return new AppError("Nie podano adresu.", 404);
+  }
+  const {
+    isNew,
+    id,
+    city,
+    street,
+    zipCode,
+    houseNumber,
+    flatNumber,
+    phoneNumber,
+  } = address;
+
+  let addressFromDb;
+
+  if (!isNew) {
+    addressFromDb = await Address.findById(id);
+  }
+
+  if (!addressFromDb && !isNew) {
+    return new AppError("Podany adres nie istnieje w bazie danych", 404);
+  }
+
+  if (!addressFromDb) {
+    const addressObj = {
+      user,
+      city,
+      street,
+      phoneNumber,
+      zipCode,
+      houseNumber,
+      phoneNumber,
+    };
+
+    if (flatNumber) {
+      addressObj.flatNumber = flatNumber;
+    }
+    addressFromDb = await Address.create(addressObj);
+  }
+
+  addressFromDb = addressFromDb.toObject();
+
+  return addressFromDb._id;
+};
+
+exports.addressVerification = catchAsync(async (req, res, next) => {
+  const addressId = await addressProcessing(req.body.address, req.booking.user);
+  if (addressId.message) {
+    return next(addressId);
+  }
+
+  req.booking.address = addressId;
+
+  console.log("2. address ok");
+
+  next();
+});
+
+// 3 invoice for booking
+
+exports.invoiceValidation = catchAsync(async (req, res, next) => {
+  const { invoiceAddress, invoice, isWithInvoice } = req.body;
+  const { user } = req.booking;
+
+  console.log(invoice);
+
+  if (!isWithInvoice) {
+    return next();
+  }
+
+  if ((!invoiceAddress || !invoice) && isWithInvoice) {
+    return next(new AppError("Brak danych do faktury", 404));
+  }
+
+  const invoiceAddressFromDb = await addressProcessing(
+    invoiceAddress,
+    user,
+    next
+  );
+
+  if (!invoiceAddressFromDb) {
+    return next(new AppError("Błąd przetwarzania adresu do faktury", 404));
+  }
+
+  const { company, nip, id, isNew } = invoice;
+
+  let invoiceFromDb;
+
+  if (!isNew) {
+    invoiceFromDb = await Invoice.findById(id);
+  }
+
+  if (!invoiceFromDb) {
+    invoiceFromDb = await Invoice.create({
+      address: invoiceAddressFromDb,
+      nip,
+      company,
+      user,
+    });
+  }
+
+  invoiceFromDb = invoiceFromDb.toObject();
+
+  req.booking.invoice = invoiceFromDb._id;
+
+  console.log("3. invoice ok");
+
+  next();
+});
+
+// 4 create booking
+
+exports.createBooking = catchAsync(async (req, res, next) => {
+  const { booking } = req;
+  const {
+    booking: { deliveryType, paymentInAdvance },
+    products,
+    coupon,
+  } = req.body;
+  console.log(booking);
+  if (!deliveryType || paymentInAdvance === undefined) {
+    return next(
+      new AppError("Wystąpił problem z wyborem sposobu dostawy", 404)
+    );
+  }
+
+  const deliveryCost =
+    (Math.floor(deliveryType.price * 100) + (paymentInAdvance ? 0 : 500)) / 100;
+
+  // calculate price
+  const productsPrice = products
+    .map(({ price, quantity }) => price * quantity)
+    .reduce((total, val) => total + val);
+  let discount = 0;
+  if (coupon && coupon.discount) {
+    discount = Math.floor(productsPrice * 100 * (coupon.discount / 100)) / 100;
+    booking.coupon = coupon.id;
+  }
+  const total = deliveryCost + productsPrice - discount;
+  const price = productsPrice - discount;
+
+  // prepare booking object
+
+  booking.paymentMethod = paymentInAdvance;
+  booking.deliveryType = deliveryType.name;
+  booking.deliveryCost = deliveryCost;
+  booking.total = total;
+  booking.price = price;
+
+  if (discount > 0) {
+    booking.discount = discount;
+  }
+
+  const newBooking = await Booking.create(booking);
+
+  req.newBooking = newBooking.toObject();
+
+  console.log("4. booking ok");
+
+  next();
+});
+
+// 5 products for booking
+
+exports.buyProducts = catchAsync(async (req, res, next) => {
+  const {
+    body: { products },
+    newBooking,
+    booking,
+  } = req;
+
+  await products.forEach(
+    async ({ id, category, productPreview, quantity, price }) => {
+      await ProductBought.create({
+        product: id,
+        user: booking.user,
+        category: category.id,
+        booking: newBooking._id,
+        productPreview,
+        quantity,
+        price,
+      });
+    }
+  );
+
+  console.log("5. products ok");
+
+  next();
+});
+
+// 6 return booking
+
+exports.checkPaymentType = catchAsync(async (req, res, next) => {
+  const { _id, paymentMethod } = req.newBooking;
+
+  if (paymentMethod === false) {
+    let newBooking = await Booking.findById(_id);
+    newBooking = newBooking.toObject();
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: newBooking,
+      },
+    });
   }
 
   next();
 });
 
-exports.addressVerification = catchAsync(async (req, res, next) => {
-  const { address } = req.body;
+// 7 create booking for payment session
 
-  if (!address || !address.id || !address.isNew) {
-    return next(new AppError("Nie podano adresu dostawy", 404));
-  }
+exports.mapBookingForPaymentSession = (req, res, next) => {
+  /*
+      {
+          name,
+          currency,
+          quantity,
+          amount
+      }
+      */
+  const lineItems = [];
+  const { products } = req.body;
 
-  // if (address.id && !address.isNew) {
-  //   const addressFromDb = await
-  // }
+  products.forEach(({ name, quantity, price }) => {
+    lineItems.push({
+      name,
+      currency: "PLN",
+      quantity,
+      amount: Math.floor(price * 100),
+    });
+  });
+
+  req.lineItems = lineItems;
+  next();
+};
+
+// 8 create payment session
+
+exports.createPaymentSession = catchAsync(async (req, res, next) => {
+  const {
+    lineItems,
+    newBooking,
+    body: { user },
+    booking: { accessToken },
+    protocol,
+  } = req;
+  const stripe = Stripe(process.env.STRIPE_API_KEY);
+
+  //create checkout session
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card", "p24"],
+    success_url: `${protocol}://${process.env.WEBPAGE_DOMAIN}${
+      process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
+    }/booking-complete/${newBooking._id}${
+      accessToken ? `?accessToken=${accessToken}` : ""
+    }`,
+    cancel_url: `${protocol}://${process.env.WEBPAGE_DOMAIN}${
+      process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
+    }`,
+    customer_email: user.email,
+    client_reference_id: `${newBooking._id}`,
+    mode: "payment",
+    line_items: lineItems,
+  });
+  res.status(200).json({
+    status: "success",
+    session,
+  });
 });
-
-exports.createBooking = catchAsync(async (req, res, next) => {});
 
 exports.sendEmail = catchAsync(async (req, res, next) => {
   if (req.user.role === "użytkownik") {
@@ -106,58 +389,6 @@ exports.processBooking = (req, res, next) => {
   });
 };
 
-exports.mapBookingForPaymentSession = (req, res, next) => {
-  /*
-    {
-        name,
-        currency,
-        quantity,
-        amount
-    }
-    */
-  const lineItems = [];
-  const { mappedBooking } = req;
-  for (const category of itemCategories) {
-    if (mappedBooking[category] && mappedBooking[category].length > 0) {
-      mappedBooking[category].forEach(({ name, quantity, amount }) => {
-        lineItems.push({
-          name,
-          currency: "PLN",
-          quantity,
-          amount,
-        });
-      });
-    }
-  }
-
-  req.lineItems = lineItems;
-  next();
-};
-
-exports.createPaymentSession = catchAsync(async (req, res, next) => {
-  const { lineItems } = req;
-  const stripe = Stripe(process.env.STRIPE_API_KEY);
-
-  //create checkout session
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card", "p24"],
-    success_url: `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
-      process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
-    }/booking-complete/${req.mappedBooking._id}`,
-    cancel_url: `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
-      process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
-    }`,
-    customer_email: req.user.email,
-    client_reference_id: `${req.mappedBooking._id}`,
-    mode: "payment",
-    line_items: lineItems,
-  });
-  res.status(200).json({
-    status: "success",
-    session,
-  });
-});
-
 exports.preventBooking = (req, res, next) => {
   if (req.body.paid && req.body.isFinished) {
     return next(
@@ -167,25 +398,55 @@ exports.preventBooking = (req, res, next) => {
   next();
 };
 
-exports.payBooking = catchAsync(async (req, res, next) => {
-  if (req.body.paid) {
-    await BookingStatus.create({
-      booking: req.params.id,
-      description: BOOKING_STATUSES.paid,
-    });
-    if (req.user.role === "użytkownik") {
-      const doc = await Booking.findById(req.params.id);
-      const url = `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
-        process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
-      }/myAccount/orders/${req.params.id}`;
-      const backendUrl = `${req.protocol}://${req.get("host")}`;
-      await new Email(req.user, url, backendUrl).sendBookingPaid(
-        doc.toObject()
-      );
-    }
+exports.payForBooking = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return next(new AppError("Nie podano id zamówienia", 404));
   }
 
-  return next();
+  let booking = await Booking.findById(id);
+
+  if (!booking) {
+    return next(new AppError("Brak zamówienia w bazie danych", 404));
+  }
+
+  const status = await BookingStatus.find({
+    booking: id,
+    description: BOOKING_STATUSES.paid,
+  });
+
+  if (status) {
+    return next(new AppError("Zamówienie zostało już opłacone", 404));
+  }
+
+  await BookingStatus.create({
+    booking: id,
+    description: BOOKING_STATUSES.paid,
+  });
+
+  booking = await Booking.findByIdAndUpdate(id, { paid: true });
+
+  // SEND MAIL TO THE CLIENT
+
+  // if (req.user.role === "użytkownik") {
+  //   const doc = await Booking.findById(req.params.id);
+  //   const url = `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
+  //     process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
+  //   }/myAccount/orders/${req.params.id}`;
+  //   const backendUrl = `${req.protocol}://${req.get("host")}`;
+  //   await new Email(req.user, url, backendUrl).sendBookingPaid(
+  //     doc.toObject()
+  //   );
+  // }
+  //}
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: booking,
+    },
+  });
 });
 
 exports.finishBooking = catchAsync(async (req, res, next) => {
