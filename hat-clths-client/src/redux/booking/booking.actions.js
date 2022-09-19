@@ -15,9 +15,9 @@ export const createBookingFailure = (error) => ({
   payload: error,
 });
 
-export const fetchBookingStart = (bookingId) => ({
+export const fetchBookingStart = (bookingId, accessToken = null) => ({
   type: bookingTypes.FETCH_BOOKING_START,
-  payload: bookingId,
+  payload: { bookingId, accessToken },
 });
 
 export const fetchBookingSuccess = (bookingData) => ({
@@ -27,5 +27,20 @@ export const fetchBookingSuccess = (bookingData) => ({
 
 export const fetchBookingFailure = (error) => ({
   type: bookingTypes.FETCH_BOOKING_FAILURE,
+  payload: error,
+});
+
+export const payForBookingStart = (bookingId, accessToken = null) => ({
+  type: bookingTypes.PAY_FOR_BOOKING_START,
+  payload: { bookingId, accessToken },
+});
+
+export const payForBookingSuccess = (bookingData) => ({
+  type: bookingTypes.PAY_FOR_BOOKING_SUCCESS,
+  payload: bookingData,
+});
+
+export const payForBookingFailure = (error) => ({
+  type: bookingTypes.PAY_FOR_BOOKING_FAILURE,
   payload: error,
 });

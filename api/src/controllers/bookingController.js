@@ -14,10 +14,37 @@ const AppError = require("../utils/appError");
 const BookingStatus = require("../models/bookingStatusModel");
 const BOOKING_STATUSES = require("../utils/bookingStatuses");
 
-const itemCategories = ["pizzas", "ownPizzas", "drinks", "sauces"];
-
 exports.getAllBookings = factory.getAll(Booking);
 exports.getBooking = factory.getOne(Booking);
+
+// ===PROTECT BOOKING===
+
+//only for bookings with given id
+exports.protectBooking = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { accessToken } = req.query;
+  if (req.user) {
+    return next();
+  }
+
+  let booking = await Booking.findById(id);
+
+  if (!booking) {
+    return next(new AppError("Nie znaleziono zamówienia w bazie danych", 404));
+  }
+
+  booking = booking.toObject();
+
+  if (!booking.accessToken) {
+    return next(new AppError("Najpierw należy się zalogować", 404));
+  }
+
+  if (booking.accessToken !== accessToken) {
+    return next(new AppError("Nieprawidłowy kod dostępu", 404));
+  }
+
+  next();
+});
 
 // ===CREATE BOOKING===
 
@@ -277,9 +304,9 @@ exports.buyProducts = catchAsync(async (req, res, next) => {
 exports.checkPaymentType = catchAsync(async (req, res, next) => {
   const { _id, paymentMethod } = req.newBooking;
 
+  let newBooking = await Booking.findById(_id);
+  newBooking = newBooking.toObject();
   if (paymentMethod === false) {
-    let newBooking = await Booking.findById(_id);
-    newBooking = newBooking.toObject();
     res.status(200).json({
       status: "success",
       data: {
@@ -287,6 +314,8 @@ exports.checkPaymentType = catchAsync(async (req, res, next) => {
       },
     });
   }
+
+  req.newBooking = newBooking;
 
   next();
 });
@@ -303,15 +332,34 @@ exports.mapBookingForPaymentSession = (req, res, next) => {
       }
       */
   const lineItems = [];
-  const { products } = req.body;
+  const {
+    products,
+    booking: { deliveryType },
+  } = req.body;
 
   products.forEach(({ name, quantity, price }) => {
     lineItems.push({
-      name,
-      currency: "PLN",
+      price_data: {
+        currency: "PLN",
+        unit_amount: Math.floor(price * 100),
+        product_data: {
+          name,
+        },
+      },
       quantity,
-      amount: Math.floor(price * 100),
     });
+  });
+
+  // add delivery to booking cost
+  lineItems.push({
+    price_data: {
+      currency: "PLN",
+      unit_amount: Math.floor(deliveryType.price * 100),
+      product_data: {
+        name: `Dostawa: ${deliveryType.name}`,
+      },
+    },
+    quantity: 1,
   });
 
   req.lineItems = lineItems;
@@ -348,7 +396,13 @@ exports.createPaymentSession = catchAsync(async (req, res, next) => {
   });
   res.status(200).json({
     status: "success",
-    session,
+    data: {
+      data: {
+        session,
+        booking: newBooking,
+        stripeKey: process.env.STRIPE_PK,
+      },
+    },
   });
 });
 
@@ -411,13 +465,11 @@ exports.payForBooking = catchAsync(async (req, res, next) => {
     return next(new AppError("Brak zamówienia w bazie danych", 404));
   }
 
-  const status = await BookingStatus.find({
-    booking: id,
-    description: BOOKING_STATUSES.paid,
-  });
+  booking = booking.toObject();
+  const status = booking.paid;
 
   if (status) {
-    return next(new AppError("Zamówienie zostało już opłacone", 404));
+    return next(new AppError("Zamówienie zostało już opłacone", 403));
   }
 
   await BookingStatus.create({

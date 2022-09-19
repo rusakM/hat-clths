@@ -29,6 +29,10 @@ const OrderSummary = lazy(() =>
   import("./pages/order-summary-page/order-summery-page.component")
 );
 
+const BookingComplete = lazy(() =>
+  import("./pages/booking-complete/booking-complete.component")
+);
+
 const App = () => {
   const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
@@ -58,6 +62,7 @@ const App = () => {
             />
             <Route element={<Checkout />} path="/cart" />
             <Route element={<OrderSummary />} path="/order-summary" />
+            <Route element={<BookingComplete />} path="/booking-complete/:id" />
           </Routes>
         </Suspense>
       </RootContainer>

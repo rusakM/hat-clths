@@ -7,7 +7,11 @@ const router = express.Router();
 
 router.use(authController.tryProtect);
 
-router.get("/payForBooking/:id", bookingController.payForBooking);
+router.get(
+  "/payForBooking/:id",
+  bookingController.protectBooking,
+  bookingController.payForBooking
+);
 
 router
   .route("/")
@@ -22,6 +26,8 @@ router
     bookingController.createPaymentSession
   );
 
-router.route("/:id").get(bookingController.getBooking);
+router
+  .route("/:id")
+  .get(bookingController.protectBooking, bookingController.getBooking);
 
 module.exports = router;
