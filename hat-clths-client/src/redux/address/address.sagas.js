@@ -1,7 +1,12 @@
 import { all, call, takeLatest, put } from "redux-saga/effects";
 import addressTypes from "./address.types";
-import { getMyAddresses } from "../../api/address.functions";
-import { fetchAddressSuccess, fetchAddressFailure } from "./address.actions";
+import { getMyAddresses, deleteAddress } from "../../api/address.functions";
+import {
+  fetchAddressSuccess,
+  fetchAddressFailure,
+  deleteAddressSuccess,
+  deleteAddressFailure,
+} from "./address.actions";
 
 export function* fetchAddressStart() {
   try {
@@ -13,10 +18,23 @@ export function* fetchAddressStart() {
   }
 }
 
+export function* deleteAddressStart({ payload }) {
+  try {
+    yield deleteAddress(payload);
+    yield put(deleteAddressSuccess(payload));
+  } catch (error) {
+    yield put(deleteAddressFailure(error));
+  }
+}
+
 export function* onFetchingAddressStart() {
   yield takeLatest(addressTypes.FETCH_ADDRESS_START, fetchAddressStart);
 }
 
+export function* onDeletingAddressStart() {
+  yield takeLatest(addressTypes.DELETE_ADDRESS_START, deleteAddressStart);
+}
+
 export function* addressSagas() {
-  yield all([call(onFetchingAddressStart)]);
+  yield all([call(onFetchingAddressStart), call(onDeletingAddressStart)]);
 }

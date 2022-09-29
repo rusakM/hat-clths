@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 
@@ -26,10 +26,11 @@ const BookingComplete = ({
   payForBooking,
 }) => {
   const params = useParams();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
-  const { accessToken } = params;
-  const bookingId = location.pathname.split("/")[2];
+  const accessToken = searchParams.get("accessToken");
+  console.log(params);
+  const bookingId = params.id;
   const bookingLink = `/bookings/${bookingId}${
     accessToken ? `?accessToken=${accessToken}` : ""
   }`;

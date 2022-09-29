@@ -5,7 +5,7 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 
 exports.getUserAddress = catchAsync(async (req, res, next) => {
-  const address = await Address.find({ user: req.user.id });
+  let address = await Address.find({ user: req.user.id });
 
   if (!address) {
     return next(
@@ -15,6 +15,9 @@ exports.getUserAddress = catchAsync(async (req, res, next) => {
       )
     );
   }
+
+  address = address.filter((address) => address.active);
+
   res.status(200).json({
     status: "success",
     results: address.length,

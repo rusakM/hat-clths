@@ -42,3 +42,18 @@ export const selectInvoiceAddress = (address) => ({
 export const activateInvoice = () => ({
   type: addressTypes.ACTIVATE_INVOICE,
 });
+
+export const deleteAddressStart = (addressId) => ({
+  type: addressTypes.DELETE_ADDRESS_START,
+  payload: addressId,
+});
+
+export const deleteAddressSuccess = (addressId) => ({
+  type: addressTypes.DELETE_ADDRESS_SUCCESS,
+  payload: addressId,
+});
+
+export const deleteAddressFailure = (error) => ({
+  type: addressTypes.DELETE_ADDRESS_FAILURE,
+  payload: error,
+});

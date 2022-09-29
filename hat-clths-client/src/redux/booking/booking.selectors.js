@@ -16,3 +16,8 @@ export const selectError = createSelector(
   [selectBookingData],
   (booking) => booking.error
 );
+
+export const selectBookingList = createSelector(
+  [selectBookingData],
+  (booking) => booking.bookingsList
+);

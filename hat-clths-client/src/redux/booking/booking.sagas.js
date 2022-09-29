@@ -7,12 +7,15 @@ import {
   createBookingFailure,
   payForBookingSuccess,
   payForBookingFailure,
+  fetchBookingListSuccess,
+  fetchBookingListFailure,
 } from "./booking.actions";
 
 import {
   getBooking,
   createBooking,
   payForBooking,
+  getBookingList,
 } from "../../api/booking.functions";
 
 export function* fetchBookingStart({ payload: { bookingId, accessToken } }) {
@@ -21,6 +24,16 @@ export function* fetchBookingStart({ payload: { bookingId, accessToken } }) {
     yield put(fetchBookingSuccess(booking));
   } catch (error) {
     yield put(fetchBookingFailure(error));
+  }
+}
+
+export function* fetchBookingListStart() {
+  try {
+    const bookingList = yield getBookingList();
+
+    yield put(fetchBookingListSuccess(bookingList));
+  } catch (error) {
+    yield put(fetchBookingListFailure(error));
   }
 }
 
@@ -52,6 +65,13 @@ export function* onFetchingBookingStart() {
   yield takeLatest(bookingTypes.FETCH_BOOKING_START, fetchBookingStart);
 }
 
+export function* onFetchingBookingListStart() {
+  yield takeLatest(
+    bookingTypes.FETCH_BOOKING_LIST_START,
+    fetchBookingListStart
+  );
+}
+
 export function* onPayingForBookingStart() {
   yield takeLatest(bookingTypes.PAY_FOR_BOOKING_START, payForBookingStart);
 }
@@ -61,5 +81,6 @@ export function* bookingSagas() {
     call(onFetchingBookingStart),
     call(onCreatingBookingStart),
     call(onPayingForBookingStart),
+    call(onFetchingBookingListStart),
   ]);
 }

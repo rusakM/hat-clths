@@ -3,9 +3,13 @@ const AppError = require("../utils/appError");
 const APIFeatures = require("../utils/apiFeatures");
 
 const checkUserRestriction = async (message, Model, req, next) => {
-  if (req.user && req.user.role === "użytkownik") {
-    const d = await Model.findById(req.params.id);
+  const d = await Model.findById(req.params.id);
 
+  if (!d) {
+    return next(new AppError("Nie znaleziono w bazie danych", 404));
+  }
+
+  if (req.user && req.user.role === "użytkownik") {
     if (!d.user) {
       return;
     }

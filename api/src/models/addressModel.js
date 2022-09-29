@@ -97,6 +97,7 @@ addressSchema.pre(/^find/, function (next) {
   if (this.options._recursed) {
     return next();
   }
+
   this.populate({
     path: "user",
     select: "-__v -role -photo -active",

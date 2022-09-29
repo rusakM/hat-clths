@@ -13,6 +13,7 @@ const INITIAL_STATE = {
 const addressReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case addressTypes.FETCH_ADDRESS_START:
+    case addressTypes.DELETE_ADDRESS_START:
       return {
         ...state,
         isFetching: true,
@@ -24,6 +25,7 @@ const addressReducer = (state = INITIAL_STATE, action) => {
         addressList: action.payload,
       };
     case addressTypes.FETCH_ADDRESS_FAILURE:
+    case addressTypes.DELETE_ADDRESS_FAILURE:
       return {
         ...state,
         isFetching: false,
@@ -81,6 +83,16 @@ const addressReducer = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         orderWithInvoice: !state.orderWithInvoice,
+      };
+    case addressTypes.DELETE_ADDRESS_SUCCESS:
+      const newAddressList = state.addressList.filter(
+        (item) => item.id !== action.payload
+      );
+
+      return {
+        ...state,
+        isFetching: false,
+        addressList: newAddressList,
       };
     default:
       return state;

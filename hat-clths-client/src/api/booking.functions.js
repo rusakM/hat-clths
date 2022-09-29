@@ -10,7 +10,8 @@ export const getBooking = async (bookingId, accessToken) => {
 
     return bookingData;
   } catch (error) {
-    throw new AppError("Błąd pobierania danych", 404);
+    const { message, statusCode } = error.response.data;
+    throw new AppError(message, statusCode);
   }
 };
 
@@ -48,5 +49,15 @@ export const redirectToPaymentSession = async (bookingData) => {
     });
   } else {
     return false;
+  }
+};
+
+export const getBookingList = async () => {
+  try {
+    const bookingList = await getData("/api/bookings");
+
+    return bookingList;
+  } catch (error) {
+    throw new AppError("Błąd pobbierania danych", 404);
   }
 };

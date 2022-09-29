@@ -1,4 +1,4 @@
-import { getData, AppError } from "./api.functions";
+import { getData, AppError, sendData } from "./api.functions";
 
 export const getMyAddresses = async () => {
   try {
@@ -7,5 +7,19 @@ export const getMyAddresses = async () => {
     return addressList;
   } catch (error) {
     throw new AppError("Błąd pobierania danych...", 404);
+  }
+};
+
+export const deleteAddress = async (addressId) => {
+  try {
+    const addressDeleted = !!(await sendData(
+      `/api/users/addresses/${addressId}`,
+      { active: false },
+      "PATCH"
+    ));
+
+    return addressDeleted;
+  } catch (error) {
+    throw error;
   }
 };

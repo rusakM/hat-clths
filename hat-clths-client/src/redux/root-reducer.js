@@ -9,6 +9,7 @@ import menuReducer from "./mobile-menu/menu.reducer";
 import cartReducer from "./cart/cart.reducer";
 import addressReducer from "./address/address.reducer";
 import bookingReducer from "./booking/booking.reducer";
+import errorReducer from "./error/error.reducer";
 
 const persistConfig = {
   key: "root",
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   address: addressReducer,
   booking: bookingReducer,
+  error: errorReducer,
 });
 
 export default persistReducer(persistConfig, rootReducer);

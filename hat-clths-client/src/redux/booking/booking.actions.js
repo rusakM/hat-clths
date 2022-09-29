@@ -44,3 +44,17 @@ export const payForBookingFailure = (error) => ({
   type: bookingTypes.PAY_FOR_BOOKING_FAILURE,
   payload: error,
 });
+
+export const fetchBookingListStart = () => ({
+  type: bookingTypes.FETCH_BOOKING_LIST_START,
+});
+
+export const fetchBookingListSuccess = (bookingsList) => ({
+  type: bookingTypes.FETCH_BOOKING_LIST_SUCCESS,
+  payload: bookingsList,
+});
+
+export const fetchBookingListFailure = (error) => ({
+  type: bookingTypes.FETCH_BOOKING_LIST_FAILURE,
+  payload: error,
+});

@@ -15,6 +15,7 @@ router.get(
 
 router
   .route("/")
+  .get(authController.protect, bookingController.getAllBookings)
   .post(
     bookingController.userVerification,
     bookingController.addressVerification,

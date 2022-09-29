@@ -67,6 +67,7 @@ const bookingSchema = new mongoose.Schema(
       ref: "Invoice",
     },
     accessToken: String,
+    barcode: String,
   },
   {
     toJSON: { virtuals: true },
@@ -91,11 +92,17 @@ bookingSchema.virtual("products", {
 bookingSchema.pre("save", async function (next) {
   if (this.isNew) {
     const time = Date.now();
+    const md5time = md5(time);
     this.createdAt = time;
+
+    const first = `${md5time}`.substring(0, 4);
+    const second = `${md5time}`.substring(md5time.length - 4, md5time.length);
+
+    this.barcode = `${first}-${second}`;
 
     const user = await User.findById(this.user);
     if (!user.active) {
-      this.accessToken = md5(time);
+      this.accessToken = md5time;
     }
   }
 

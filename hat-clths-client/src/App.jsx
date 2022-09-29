@@ -33,6 +33,12 @@ const BookingComplete = lazy(() =>
   import("./pages/booking-complete/booking-complete.component")
 );
 
+const Account = lazy(() => import("./pages/account/account.component"));
+
+const ErrorPage = lazy(() => import("./pages/error-page/error-page.component"));
+
+const BookingPage = lazy(() => import("./pages/booking/booking.component"));
+
 const App = () => {
   const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
@@ -63,6 +69,12 @@ const App = () => {
             <Route element={<Checkout />} path="/cart" />
             <Route element={<OrderSummary />} path="/order-summary" />
             <Route element={<BookingComplete />} path="/booking-complete/:id" />
+            <Route element={<Account />} path="/account" />
+            <Route element={<Account />} path="/account/address" />
+            <Route element={<Account />} path="/account/bookings" />
+            <Route element={<Account />} path="/account/bookings/:id" />
+            <Route element={<ErrorPage />} path="/error" />
+            <Route element={<BookingPage />} path="/bookings/:id" />
           </Routes>
         </Suspense>
       </RootContainer>
