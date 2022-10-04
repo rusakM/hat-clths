@@ -22,6 +22,8 @@ router
     bookingController.invoiceValidation,
     bookingController.createBooking,
     bookingController.buyProducts,
+    bookingController.getNewBooking,
+    bookingController.sendEmail,
     bookingController.checkPaymentType,
     bookingController.mapBookingForPaymentSession,
     bookingController.createPaymentSession

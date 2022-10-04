@@ -76,7 +76,7 @@ productPreviewSchema.pre(/^find/, function (next) {
   }
   this.populate({
     path: "category",
-    select: "-__v -name -picture -gender -isDeactivated",
+    select: "-__v -name -gender -isDeactivated",
     options: { _recursed: true },
   });
 

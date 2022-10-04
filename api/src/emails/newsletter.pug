@@ -1,0 +1,31 @@
+extends baseEmail
+
+block content
+    p Hej #{firstName}!
+    p Przygotowaliśmy zestawienie naszych najlepiej dopasowanych dla Ciebie produktów.
+    
+    ul.newsletter-list 
+        each product in otherProps[0] 
+            li.newsletter-list-item 
+                img(src=`${url}/uploads/products/${product.imageCover}`)
+                div 
+                    a(href=`${url}/products/${product.category.slug}/${product._id}`) 
+                        h3= `${product.name}`
+                    h2= `${product.price}`
+
+
+    table.btn.btn-primary(role='presentaion', border='0', cellpadding='0', cellspacing='0')
+        tbody
+            tr
+                td(align='left')
+                    table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+                        tbody
+                            tr
+                                td
+                                    a(href=`${url}`, target='_blank') Na zakupy!
+    br
+    
+    table(role='presentaion', border='1', cellpadding='0', cellspacing='0')
+                        thead
+    p
+    p - Zespół Hat-Clths

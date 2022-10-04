@@ -13,6 +13,7 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const BookingStatus = require("../models/bookingStatusModel");
 const BOOKING_STATUSES = require("../utils/bookingStatuses");
+const formatPrice = require("../utils/formatPrice");
 
 exports.getAllBookings = factory.getAll(Booking);
 exports.getBooking = factory.getOne(Booking);
@@ -77,7 +78,7 @@ exports.userVerification = catchAsync(async (req, res, next) => {
   if (!userFromDb && !isNew) {
     return next(new AppError("Brak użytkownika w bazie danych", 404));
   }
-  let accessToken;
+
   if (!userFromDb) {
     userFromDb = await User.create({
       name,
@@ -86,18 +87,14 @@ exports.userVerification = catchAsync(async (req, res, next) => {
       password: process.env.JWT_SECRET,
       passwordConfirm: process.env.JWT_SECRET,
     });
-
-    accessToken = md5(`${process.env.JWT_SECRET}${userFromDb._id}`);
   }
+  const accessToken = md5(`${process.env.JWT_SECRET}${userFromDb._id}`);
 
   userFromDb = userFromDb.toObject();
   req.booking = {
     user: userFromDb._id,
   };
-
-  if (accessToken) {
-    req.booking.accessToken = accessToken;
-  }
+  req.booking.accessToken = accessToken;
 
   console.log("1. user ok");
 
@@ -299,7 +296,35 @@ exports.buyProducts = catchAsync(async (req, res, next) => {
   next();
 });
 
-// 6 return booking
+// 6 get new booking
+
+exports.getNewBooking = catchAsync(async (req, res, next) => {
+  let newBooking = await Booking.findById(req.newBooking._id);
+  newBooking = newBooking.toObject();
+
+  req.newBooking = newBooking;
+
+  next();
+});
+
+// 7 send email
+
+exports.sendEmail = catchAsync(async (req, res, next) => {
+  const { newBooking } = req;
+  newBooking.price = formatPrice(newBooking.price);
+  if (req.user.role === "użytkownik") {
+    const { WEBPAGE_PORT, WEBPAGE_DOMAIN } = process.env;
+    const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
+      WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
+    }/bookings/${newBooking._id}?accessToken=${newBooking.accessToken}`;
+    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    await new Email(req.user, url, backendUrl).sendBooking(newBooking);
+  }
+
+  next();
+});
+
+// 8 return booking
 
 exports.checkPaymentType = catchAsync(async (req, res, next) => {
   const { _id, paymentMethod } = req.newBooking;
@@ -320,7 +345,7 @@ exports.checkPaymentType = catchAsync(async (req, res, next) => {
   next();
 });
 
-// 7 create booking for payment session
+// 9 create booking for payment session
 
 exports.mapBookingForPaymentSession = (req, res, next) => {
   /*
@@ -366,7 +391,7 @@ exports.mapBookingForPaymentSession = (req, res, next) => {
   next();
 };
 
-// 8 create payment session
+// 10 create payment session
 
 exports.createPaymentSession = catchAsync(async (req, res, next) => {
   const {
@@ -404,18 +429,6 @@ exports.createPaymentSession = catchAsync(async (req, res, next) => {
       },
     },
   });
-});
-
-exports.sendEmail = catchAsync(async (req, res, next) => {
-  if (req.user.role === "użytkownik") {
-    const url = `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
-      process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
-    }/myAccount/orders/${req.mappedBooking._id}`;
-    const backendUrl = `${req.protocol}://${req.get("host")}`;
-    await new Email(req.user, url, backendUrl).sendBooking(req.mappedBooking);
-  }
-
-  next();
 });
 
 exports.generateInvoice = (req, res, next) => {
@@ -481,17 +494,16 @@ exports.payForBooking = catchAsync(async (req, res, next) => {
 
   // SEND MAIL TO THE CLIENT
 
-  // if (req.user.role === "użytkownik") {
-  //   const doc = await Booking.findById(req.params.id);
-  //   const url = `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
-  //     process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
-  //   }/myAccount/orders/${req.params.id}`;
-  //   const backendUrl = `${req.protocol}://${req.get("host")}`;
-  //   await new Email(req.user, url, backendUrl).sendBookingPaid(
-  //     doc.toObject()
-  //   );
-  // }
-  //}
+  if (req.user.role === "użytkownik") {
+    const { WEBPAGE_DOMAIN, WEBPAGE_PORT } = process.env;
+    let doc = await Booking.findById(req.params.id);
+    doc = doc.toObject();
+    const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
+      WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
+    }/bookings/${req.params.id}?accessToken=${doc.accessToken}`;
+    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    await new Email(req.user, url, backendUrl).sendBookingPaid(doc);
+  }
 
   res.status(200).json({
     status: "success",

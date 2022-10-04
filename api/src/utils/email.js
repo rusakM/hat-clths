@@ -47,7 +47,7 @@ module.exports = class Email {
       to: this.to,
       subject,
       html,
-      text: htmlToText(html),
+      text: htmlToText.compile(html),
     };
     await this.newTransport().sendMail(mailOptions);
   }
@@ -74,5 +74,9 @@ module.exports = class Email {
       "Hat-Clths - zamówienie zostało opłacone",
       booking
     );
+  }
+
+  async sendNewsletter(productsList) {
+    await this.send("newsletter", "Newsletter Hat-Clths", productsList);
   }
 };
