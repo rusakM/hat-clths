@@ -1,10 +1,17 @@
 const express = require("express");
 const categoryController = require("../controllers/categoryController");
 const authController = require("../controllers/authController");
-
+const productPreviewController = require("../controllers/productPreviewController");
 const router = express.Router();
 
 //for everyone
+
+router.get(
+  "/for-him/products",
+  productPreviewController.indicateForHim,
+  productPreviewController.getProductsByGender
+);
+router.get("/for-her/products", productPreviewController.getProductsByGender);
 
 router.get("/", categoryController.getCategories);
 

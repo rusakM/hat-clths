@@ -7,6 +7,7 @@ const AppError = require("../utils/appError");
 const photoSaver = require("../utils/photoSaver");
 const factory = require("./handlerFactory");
 const PRODUCT_SIZE_TABLE = require("../utils/productSizes");
+const uniqueSet = require("../utils/uniqueSet");
 
 exports.getProduct = factory.getOne(ProductPreview);
 
@@ -333,4 +334,76 @@ exports.showProduct = catchAsync(async (req, res, next) => {
   await ProductShow.create(productShowData);
 
   next();
+});
+
+exports.indicateForHim = (req, res, next) => {
+  req.query.gender = true;
+
+  next();
+};
+
+exports.getProductsByGender = catchAsync(async (req, res, next) => {
+  const gender = req.query.gender || false;
+  let productsList = await ProductPreview.aggregate([
+    {
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        description: 1,
+        category: {
+          _id: 1,
+          name: 1,
+          slug: 1,
+          gender: 1,
+        },
+        price: 1,
+        imageCover: 1,
+        isAvailable: 1,
+      },
+    },
+    {
+      $unwind: "$category",
+    },
+
+    {
+      $set: {
+        gender: "$category.gender",
+        categoryId: "$category._id",
+      },
+    },
+    {
+      $match: {
+        $and: [{ isAvailable: true }, { gender }],
+      },
+    },
+    {
+      $sort: { categoryId: 1, id: 1 },
+    },
+  ]);
+
+  const categoriesList = productsList.map((product) => product.categoryId);
+  const categories = uniqueSet.createSet(categoriesList);
+  productsList = categories
+    .map((category) =>
+      productsList
+        .filter((product) => `${product.category._id}` === `${category}`)
+        .slice(0, 3)
+    )
+    .flat();
+
+  res.status(200).json({
+    status: "success",
+    results: productsList.length,
+    data: {
+      data: productsList,
+    },
+  });
 });

@@ -14,6 +14,14 @@ router.get(
   productPreviewController.getProducts
 );
 
+router.get("/for-her", productPreviewController.getProductsByGender);
+
+router.get(
+  "/for-him",
+  productPreviewController.indicateForHim,
+  productPreviewController.getProductsByGender
+);
+
 router.get(
   "/:id",
   authController.tryProtect,

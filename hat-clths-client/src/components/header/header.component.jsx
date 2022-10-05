@@ -53,8 +53,12 @@ const Header = ({ currentUser, signOutStart, toggleMenu, menuHidden }) => {
         <CompanyDescription>Hat-clths</CompanyDescription>
       </LogoContainer>
       <OptionsContainer>
-        {!isMobile && <OptionsLink to="/forher">Dla niej</OptionsLink>}
-        {!isMobile && <OptionsLink to="/forhim">Dla niego</OptionsLink>}
+        {!isMobile && (
+          <OptionsLink to="/products/for-her">Dla niej</OptionsLink>
+        )}
+        {!isMobile && (
+          <OptionsLink to="/products/for-him">Dla niego</OptionsLink>
+        )}
         {!isMobile && <OptionsLink to="/cart">Koszyk</OptionsLink>}
         {!isMobile && currentUser && (
           <OptionsLink to="/account">Moje konto</OptionsLink>
