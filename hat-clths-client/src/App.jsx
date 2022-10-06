@@ -39,6 +39,10 @@ const ErrorPage = lazy(() => import("./pages/error-page/error-page.component"));
 
 const BookingPage = lazy(() => import("./pages/booking/booking.component"));
 
+const UnsubscribePage = lazy(() =>
+  import("./pages/unsubscribe/unsubscribe.component")
+);
+
 const App = () => {
   const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
@@ -75,6 +79,10 @@ const App = () => {
             <Route element={<Account />} path="/account/bookings/:id" />
             <Route element={<ErrorPage />} path="/error" />
             <Route element={<BookingPage />} path="/bookings/:id" />
+            <Route
+              element={<UnsubscribePage />}
+              path="/newsletter/unsubscribe/:id"
+            />
           </Routes>
         </Suspense>
       </RootContainer>

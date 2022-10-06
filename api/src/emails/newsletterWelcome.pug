@@ -1,0 +1,13 @@
+extends baseEmail
+
+block content
+    p Hej!
+    p
+    p Dziękujemy za zapisanie się do newslettera.
+    p Od teraz na twoją skrzynkę będą przychodzić najlepiej dopasowane dla Ciebie rekomendacje z Naszego sklepu.
+    p
+    p Jeśli nie chcesz otrzymywać od nas wiadomości&nbsp;
+        a(href=`${url}/newsletter/unsubscribe/${otherProps[0]._id}`, target='_blank')
+            u wypisz się
+    p
+    p - Zespół Hat-Clths

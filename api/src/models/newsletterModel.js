@@ -29,16 +29,12 @@ const newsletterSchema = new mongoose.Schema(
   }
 );
 
-newsletterSchema.pre("save", async function (next) {
-  const user = await User.findOne({ email: this.email });
-  this.user = user._id;
-
-  next();
-});
-newsletterSchema.pre("save", function (next) {
-  if (this.isModified("isActiveSubscription")) {
-    console.log(this);
+newsletterSchema.pre(/save|update/gi, async function (next) {
+  if (!this.user && this.email) {
+    const user = await User.findOne({ email: this.email });
+    this.user = user._id;
   }
+
   next();
 });
 
@@ -51,7 +47,7 @@ newsletterSchema.pre("find", function (next) {
   next();
 });
 
-newsletterSchema.post("save", async function (doc, next) {
+newsletterSchema.post(/save|update/gi, async function (doc, next) {
   if (doc.user) {
     await User.findOneAndUpdate(
       { email: doc.email },

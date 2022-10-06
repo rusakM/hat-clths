@@ -1,13 +1,25 @@
 import React, { useEffect, lazy, Suspense, useState } from "react";
 import { connect } from "react-redux";
 import { useMediaQuery } from "react-responsive";
+import { createStructuredSelector } from "reselect";
 
 import Tile from "../../components/tile/tile.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
 import FormInput from "../../components/form-input/form-input.component";
 import Spinner from "../../components/spinner/spinner.component";
+import Popup from "../../components/popup/popup.component";
+import SmallSpinner from "../../components/small-spinner/small-spinner.component";
 
 import { fetchTopProductsStart } from "../../redux/products/product.actions";
+import {
+  subscribeStart,
+  clearSubscriptionStatus,
+} from "../../redux/newsletter/newsletter.actions";
+import {
+  selectSubscriptionStatus,
+  selectError,
+  selectIsFetchingData,
+} from "../../redux/newsletter/newsletter.selectors";
 
 import {
   MainPageContainer,
@@ -30,7 +42,14 @@ const TopProductsList = lazy(() =>
   import("../../components/top-products-list/top-products-list.container")
 );
 
-const MainPage = ({ fetchTopProducts }) => {
+const MainPage = ({
+  subscriptionStatus,
+  subscriptionError,
+  isLoading,
+  fetchTopProducts,
+  subscribe,
+  clearSubscriptionStatus,
+}) => {
   const [newsletter, setNewsletter] = useState({
     email: "",
     agreement: false,
@@ -60,6 +79,19 @@ const MainPage = ({ fetchTopProducts }) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
+    const { email, agreement } = newsletter;
+    if (!agreement) {
+      return;
+    }
+    subscribe(email);
+  };
+
+  const newsletterConfirm = () => {
+    setNewsletter({
+      email: "",
+      agreement: false,
+    });
+    clearSubscriptionStatus();
   };
 
   return (
@@ -161,6 +193,7 @@ const MainPage = ({ fetchTopProducts }) => {
                 style={{ minWidth: "250px" }}
               />
               <CustomButton type="submit">ZAPISZ SIĘ</CustomButton>
+              {isLoading && <SmallSpinner />}
             </FormRow>
             <div className="row centered-div">
               <input
@@ -175,14 +208,44 @@ const MainPage = ({ fetchTopProducts }) => {
               </label>
             </div>
           </NewsletterForm>
+          {subscriptionStatus && (
+            <Popup>
+              <h2>Newsletter</h2>
+              {subscriptionStatus && (
+                <p>
+                  Na podany adres email zostało wysłane potwierdzenie o
+                  zapisaniu się do newslettera.
+                </p>
+              )}
+              {subscriptionError && <p>Wystąpił błąd. Spróbuj ponownie.</p>}
+              <CustomButton
+                onClick={newsletterConfirm}
+                style={{
+                  marginTop: "1em",
+                  transform: "translateX(-50%)",
+                  marginLeft: "50%",
+                }}
+              >
+                Zamknij
+              </CustomButton>
+            </Popup>
+          )}
         </NewsletterContainer>
       </ListsContainer>
     </MainPageContainer>
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  fetchTopProducts: () => dispatch(fetchTopProductsStart()),
+const mapStateToProps = createStructuredSelector({
+  subscriptionStatus: selectSubscriptionStatus,
+  subscriptionError: selectError,
+  isLoading: selectIsFetchingData,
 });
 
-export default connect(null, mapDispatchToProps)(MainPage);
+const mapDispatchToProps = (dispatch) => ({
+  fetchTopProducts: () => dispatch(fetchTopProductsStart()),
+  subscribe: (email) => dispatch(subscribeStart(email)),
+  clearSubscriptionStatus: () => dispatch(clearSubscriptionStatus()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(MainPage);

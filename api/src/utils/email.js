@@ -5,7 +5,7 @@ const htmlToText = require("html-to-text");
 module.exports = class Email {
   constructor(user, url, backendUrl) {
     this.to = user.email;
-    this.firstName = user.name.split(" ")[0];
+    this.firstName = user.name ? user.name.split(" ")[0] : "";
     this.url = url || "";
     this.from = `Hat-Clths <${process.env.EMAIL_FROM}>`;
     this.backendUrl = backendUrl || "";
@@ -78,5 +78,9 @@ module.exports = class Email {
 
   async sendNewsletter(productsList) {
     await this.send("newsletter", "Newsletter Hat-Clths", productsList);
+  }
+
+  async sendNewsletterWelcome(newsletterData) {
+    await this.send("newsletterWelcome", "Newsletter Hat-Clts", newsletterData);
   }
 };
