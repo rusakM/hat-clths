@@ -1,7 +1,7 @@
 import axios from "axios";
 import validator from "validator";
 
-import { getData, AppError } from "./api.functions";
+import { getData, AppError, sendData } from "./api.functions";
 
 export const signInWithEmailAndPassword = async (email, password) => {
   try {
@@ -102,4 +102,43 @@ export const validateNewUser = ({ email, password, passwordConfirm, name }) => {
     throw error;
   }
   return true;
+};
+
+export const passwordChange = async (passwordData) => {
+  try {
+    const passwords = await sendData(
+      "/api/users/updateMyPassword",
+      passwordData,
+      "PATCH"
+    );
+    return passwords;
+  } catch (error) {
+    const { message, statusCode } = error.response.data;
+    throw new AppError(message, statusCode);
+  }
+};
+
+export const resetPassword = async (passwordData, token) => {
+  try {
+    const password = await sendData(
+      `/api/resetPassword/${token}`,
+      "PATCH",
+      passwordData
+    );
+    return password;
+  } catch (error) {
+    const { message, statusCode } = error.response.data;
+    throw new AppError(message, statusCode);
+  }
+};
+
+export const forgotPassword = async (email) => {
+  try {
+    const password = await sendData("/api/forgotPassword", { email }, "POST");
+
+    return password;
+  } catch (error) {
+    const { message, statusCode } = error.response.data;
+    throw new AppError(message, statusCode);
+  }
 };

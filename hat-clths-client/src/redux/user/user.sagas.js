@@ -9,6 +9,9 @@ import {
   signUp,
   validateNewUser,
   loginWithGoogle,
+  passwordChange,
+  resetPassword,
+  forgotPassword,
 } from "../../api/user.functions";
 
 import {
@@ -20,6 +23,11 @@ import {
   signUpFailure,
   googleSignInSuccess,
   googleSignInFailure,
+  changePasswordSuccess,
+  changePasswordFailure,
+  forgotPasswordSuccess,
+  resetPasswordSuccess,
+  resetPasswordFailure,
 } from "./user.actions";
 
 export function* signIn({ payload: { email, password } }) {
@@ -71,6 +79,36 @@ export function* isUserAuthenticated() {
   }
 }
 
+export function* changePasswordStart({ payload }) {
+  try {
+    const user = yield passwordChange(payload);
+
+    yield put(changePasswordSuccess(user));
+  } catch (error) {
+    yield put(changePasswordFailure(error));
+  }
+}
+
+export function* forgotPasswordStart({ payload }) {
+  try {
+    const user = yield forgotPassword(payload);
+
+    yield put(forgotPasswordSuccess(user));
+  } catch (error) {
+    yield put(forgotPasswordSuccess(error));
+  }
+}
+
+export function* resetPasswordStart({ payload: { passwordData, token } }) {
+  try {
+    const user = yield resetPassword(passwordData, token);
+
+    yield put(resetPasswordSuccess(user));
+  } catch (error) {
+    yield put(resetPasswordFailure(error));
+  }
+}
+
 export function* onSignInStart() {
   yield takeLatest(UserActionTypes.SIGN_IN_START, signIn);
 }
@@ -91,6 +129,18 @@ export function* onSignInWithGoogleStart() {
   yield takeLatest(UserActionTypes.GOOGLE_SIGN_IN_START, signInWithGoogle);
 }
 
+export function* onPasswordChangeStart() {
+  yield takeLatest(UserActionTypes.CHANGE_PASSWORD_START, changePasswordStart);
+}
+
+export function* onPasswordForgotStart() {
+  yield takeLatest(UserActionTypes.FORGOT_PASSWORD_START, forgotPasswordStart);
+}
+
+export function* onPasswordResetStart() {
+  yield takeLatest(UserActionTypes.RESET_PASSWORD_START, resetPasswordStart);
+}
+
 export function* userSagas() {
   yield all([
     call(onSignInStart),
@@ -98,5 +148,8 @@ export function* userSagas() {
     call(onCheckUserSession),
     call(onSignOutStart),
     call(onSignInWithGoogleStart),
+    call(onPasswordChangeStart),
+    call(onPasswordForgotStart),
+    call(onPasswordResetStart),
   ]);
 }

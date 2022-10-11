@@ -61,3 +61,52 @@ export const googleSignInFailure = (error) => ({
   type: UserActionTypes.GOOGLE_SIGN_IN_FAILURE,
   payload: error,
 });
+
+export const changePasswordStart = (passwordData) => ({
+  type: UserActionTypes.CHANGE_PASSWORD_START,
+  payload: passwordData,
+});
+
+export const changePasswordSuccess = (userData) => ({
+  type: UserActionTypes.CHANGE_PASSWORD_SUCCESS,
+  payload: userData,
+});
+
+export const changePasswordFailure = (error) => ({
+  type: UserActionTypes.CHANGE_PASSWORD_FAILURE,
+  payload: error,
+});
+
+export const resetPasswordStart = (passwordData, token) => ({
+  type: UserActionTypes.RESET_PASSWORD_START,
+  payload: { passwordData, token },
+});
+
+export const resetPasswordSuccess = (userData) => ({
+  type: UserActionTypes.RESET_PASSWORD_SUCCESS,
+  payload: userData,
+});
+
+export const resetPasswordFailure = (error) => ({
+  type: UserActionTypes.RESET_PASSWORD_FAILURE,
+  payload: error,
+});
+
+export const forgotPasswordStart = (email) => ({
+  type: UserActionTypes.FORGOT_PASSWORD_START,
+  payload: email,
+});
+
+export const forgotPasswordSuccess = (userData) => ({
+  type: UserActionTypes.FORGOT_PASSWORD_SUCCESS,
+  payload: userData,
+});
+
+export const forgotPasswordFailure = (error) => ({
+  type: UserActionTypes.FORGOT_PASSWORD_FAILURE,
+  payload: error,
+});
+
+export const userErrorClear = () => ({
+  type: UserActionTypes.USER_ERROR_CLEAR,
+});

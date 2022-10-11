@@ -4,15 +4,37 @@ import { createStructuredSelector } from "reselect";
 
 import CustomButton from "../custom-button/custom-button.component";
 import FormInput from "../form-input/form-input.component";
+import SmallSpinner from "../small-spinner/small-spinner.component";
+import Popup from "../popup/popup.component";
 
-import { selectCurrentUser } from "../../redux/user/user.selectors";
+import {
+  selectCurrentUser,
+  selectIsLoadingData,
+  selectLoginError,
+} from "../../redux/user/user.selectors";
+import {
+  changePasswordStart,
+  userErrorClear,
+} from "../../redux/user/user.actions";
 
 import { ViewerContainer } from "../../pages/account/account.styles";
 import { FormRow } from "../../pages/main-page/main-page.styles";
+import { validatePasswords } from "./passwordValidator";
 
 const passwordPattern = new RegExp(/^password/);
+const INITIAL_PASSWORD_DATA = {
+  password: "",
+  passwordConfirm: "",
+  passwordCurrent: "",
+};
 
-const AccountViewer = ({ currentUser }) => {
+const AccountViewer = ({
+  currentUser,
+  isLoading,
+  userError,
+  changePassword,
+  userErrorClear,
+}) => {
   const getField = (field) => {
     if (!currentUser) {
       return "";
@@ -29,11 +51,10 @@ const AccountViewer = ({ currentUser }) => {
     newsletter: false,
   });
 
-  const [passwordData, setPasswordData] = useState({
-    password: "",
-    passwordConfirm: "",
-    passwordCurrent: "",
-  });
+  const [passwordError, setPasswordError] = useState(null);
+  const [passwordMessage, setPasswordMessage] = useState("");
+
+  const [passwordData, setPasswordData] = useState(INITIAL_PASSWORD_DATA);
 
   const changeHandler = (event) => {
     const { value, name } = event.target;
@@ -66,6 +87,15 @@ const AccountViewer = ({ currentUser }) => {
 
   const modifyPassword = (event) => {
     event.preventDefault();
+    try {
+      validatePasswords(passwordData);
+      changePassword(passwordData);
+      setPasswordMessage("Hasło zostało zmienione");
+      setPasswordData(INITIAL_PASSWORD_DATA);
+    } catch (error) {
+      const { message } = error;
+      setPasswordError(message);
+    }
   };
 
   return (
@@ -106,6 +136,7 @@ const AccountViewer = ({ currentUser }) => {
           type="password"
           name="passwordCurrent"
           value={passwordData.passwordCurrent}
+          required
         />
         <FormInput
           label="nowe hasło"
@@ -113,6 +144,7 @@ const AccountViewer = ({ currentUser }) => {
           name="password"
           type="password"
           value={passwordData.password}
+          required
         />
         <FormInput
           label="powtórz hasło"
@@ -120,17 +152,64 @@ const AccountViewer = ({ currentUser }) => {
           name="passwordConfirm"
           type="password"
           value={passwordData.passwordConfirm}
+          required
         />
         <FormRow>
           <CustomButton type="submit">Zmień hasło</CustomButton>
+          {isLoading && <SmallSpinner />}
+        </FormRow>
+        <FormRow>
+          {passwordMessage && !userError && <p>{passwordMessage}</p>}
         </FormRow>
       </form>
+      {passwordError && (
+        <Popup>
+          <h2>Błąd</h2>
+          <p>{passwordError}</p>
+          <CustomButton
+            onClick={() => setPasswordError(null)}
+            style={{
+              marginTop: "1em",
+              transform: "translateX(-50%)",
+              marginLeft: "50%",
+            }}
+          >
+            OK
+          </CustomButton>
+        </Popup>
+      )}
+      {userError && (
+        <Popup>
+          <h2>Błąd</h2>
+          <p>{userError.message}</p>
+          <CustomButton
+            onClick={() => {
+              userErrorClear();
+              setPasswordMessage("");
+            }}
+            style={{
+              marginTop: "1em",
+              transform: "translateX(-50%)",
+              marginLeft: "50%",
+            }}
+          >
+            OK
+          </CustomButton>
+        </Popup>
+      )}
     </ViewerContainer>
   );
 };
 
 const mapStateToProps = createStructuredSelector({
   currentUser: selectCurrentUser,
+  isLoading: selectIsLoadingData,
+  userError: selectLoginError,
 });
 
-export default connect(mapStateToProps)(AccountViewer);
+const mapDispatchToProps = (dispatch) => ({
+  changePassword: (passwordData) => dispatch(changePasswordStart(passwordData)),
+  userErrorClear: () => dispatch(userErrorClear()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(AccountViewer);

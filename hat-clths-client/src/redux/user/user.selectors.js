@@ -16,3 +16,8 @@ export const selectSignUpError = createSelector(
   [selectUser],
   (user) => user.signUpError
 );
+
+export const selectIsLoadingData = createSelector(
+  [selectUser],
+  (user) => user.isFetching
+);
