@@ -121,9 +121,9 @@ export const passwordChange = async (passwordData) => {
 export const resetPassword = async (passwordData, token) => {
   try {
     const password = await sendData(
-      `/api/resetPassword/${token}`,
-      "PATCH",
-      passwordData
+      `/api/users/resetPassword/${token}`,
+      passwordData,
+      "PATCH"
     );
     return password;
   } catch (error) {
@@ -134,7 +134,11 @@ export const resetPassword = async (passwordData, token) => {
 
 export const forgotPassword = async (email) => {
   try {
-    const password = await sendData("/api/forgotPassword", { email }, "POST");
+    const password = await sendData(
+      "/api/users/forgotPassword",
+      { email },
+      "POST"
+    );
 
     return password;
   } catch (error) {

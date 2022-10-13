@@ -9,17 +9,19 @@ const INITIAL_STATE = {
 
 const userReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
-    case UserActionTypes.CHANGE_PASSWORD_START: {
+    case UserActionTypes.CHANGE_PASSWORD_START:
+    case UserActionTypes.FORGOT_PASSWORD_START:
+    case UserActionTypes.RESET_PASSWORD_START:
       return {
         ...state,
         isFetching: true,
       };
-    }
     case UserActionTypes.SIGN_IN_SUCCESS:
     case UserActionTypes.SIGN_UP_SUCCESS:
     case UserActionTypes.GOOGLE_SIGN_IN_SUCCESS:
     case UserActionTypes.CHANGE_PASSWORD_SUCCESS:
     case UserActionTypes.RESET_PASSWORD_SUCCESS:
+    case UserActionTypes.FORGOT_PASSWORD_SUCCESS:
       return {
         ...state,
         currentUser: action.payload,

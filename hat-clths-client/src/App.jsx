@@ -43,6 +43,14 @@ const UnsubscribePage = lazy(() =>
   import("./pages/unsubscribe/unsubscribe.component")
 );
 
+const ForgotPassword = lazy(() =>
+  import("./pages/forgot-password/forgot-password.component")
+);
+
+const ResetPassword = lazy(() =>
+  import("./pages/reset-password/reset-password.component")
+);
+
 const App = () => {
   const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
@@ -83,6 +91,8 @@ const App = () => {
               element={<UnsubscribePage />}
               path="/newsletter/unsubscribe/:id"
             />
+            <Route element={<ForgotPassword />} path="/forgot-password" />
+            <Route element={<ResetPassword />} path="/reset-password/:token" />
           </Routes>
         </Suspense>
       </RootContainer>

@@ -26,6 +26,7 @@ import {
   changePasswordSuccess,
   changePasswordFailure,
   forgotPasswordSuccess,
+  forgotPasswordFailure,
   resetPasswordSuccess,
   resetPasswordFailure,
 } from "./user.actions";
@@ -95,7 +96,7 @@ export function* forgotPasswordStart({ payload }) {
 
     yield put(forgotPasswordSuccess(user));
   } catch (error) {
-    yield put(forgotPasswordSuccess(error));
+    yield put(forgotPasswordFailure(error));
   }
 }
 

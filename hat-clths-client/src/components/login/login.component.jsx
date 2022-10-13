@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { useMediaQuery } from "react-responsive";
 import { GoogleLogin } from "@react-oauth/google";
+import { Link } from "react-router-dom";
 
 import FormInput from "../../components/form-input/form-input.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
@@ -71,6 +72,17 @@ const Login = ({
         {loginError && loginError.code && (
           <LoginWarn>{loginError.message}</LoginWarn>
         )}
+        <Link
+          to="/forgot-password"
+          style={{
+            padding: "0.5em 0 1.5em 0",
+            textDecoration: "underline",
+            fontWeight: "bold",
+            fontSize: "medium",
+          }}
+        >
+          Nie pamiętam hasła
+        </Link>
         <ButtonsContainer className={isMobile ? "column" : "row"}>
           <CustomButton type="submit">Zaloguj</CustomButton>
           <GoogleLogin

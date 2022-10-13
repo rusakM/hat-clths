@@ -43,10 +43,10 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  // const url = `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
-  //   process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
-  // }`;
-  // await new Email(newUser, `${url}/login`, url).sendWelcome();
+  const url = `${req.protocol}://${process.env.WEBPAGE_DOMAIN}${
+    process.env.WEBPAGE_PORT ? `:${process.env.WEBPAGE_PORT}` : ""
+  }`;
+  await new Email(newUser, `${url}/login`, url).sendWelcome();
   createSendToken(newUser, 201, req, res);
 });
 
@@ -236,14 +236,22 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    const url = `${req.protocol}://${req.get("host")}`;
-    const resetURL = `${url}/api/users/resetPassword/${resetToken}`;
+    const { WEBPAGE_PORT, WEBPAGE_DOMAIN } = process.env;
+    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
+      WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
+    }/reset-password/${resetToken}`;
 
-    await new Email(user, resetURL, url).sendPasswordReset();
+    await new Email(user, url, backendUrl).sendPasswordReset();
 
     res.status(200).json({
       status: "success",
-      message: "Na podany adres email został wysłany token do zmiany hasła.",
+      data: {
+        data: {
+          message:
+            "Na podany adres email został wysłany token do zmiany hasła.",
+        },
+      },
     });
   } catch (err) {
     user.passwordResetToken = undefined;
