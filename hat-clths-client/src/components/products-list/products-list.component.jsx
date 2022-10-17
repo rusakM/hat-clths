@@ -43,13 +43,13 @@ const ProductsList = ({ category }) => {
       {products &&
         mappedProducts.map((productsRow, num) => (
           <ProductsListRow key={num}>
-            {productsRow.map(({ name, price, id, imageCover, category }) => (
+            {productsRow.map(({ name, price, _id, imageCover, category }) => (
               <Tile
                 width={tileWidth}
                 unit="vw"
                 height={tileWidth}
-                link={`/products/${category.slug}/${id}`}
-                key={id}
+                link={`/products/${category.slug}/${_id}`}
+                key={_id}
                 descriptionRows={[name, formatPrice(price)]}
               >
                 <div

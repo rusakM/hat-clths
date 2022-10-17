@@ -55,7 +55,7 @@ a {
   justify-content: space-between !important;
 }
 
-.space-sround {
+.space-around {
   justify-content: space-around !important;
 }
 
@@ -71,6 +71,13 @@ a {
 
 .bold-border {
   border-width: 2px !important;
+}
+
+.small-button {
+  height: 35px !important;
+  line-height: 35px !important;
+  padding: 0 15px !important;
+  min-width: 100px !important;
 }
 
 @media (max-width: 480px) {

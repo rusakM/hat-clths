@@ -36,8 +36,6 @@ import forHer from "../../assets/landing-page/for-her.webp";
 import news from "../../assets/landing-page/news.webp";
 import forHim from "../../assets/landing-page/for-him.webp";
 
-import "./main-page.styles.css";
-
 const TopProductsList = lazy(() =>
   import("../../components/top-products-list/top-products-list.container")
 );

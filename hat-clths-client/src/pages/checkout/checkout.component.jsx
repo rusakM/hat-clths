@@ -32,8 +32,6 @@ import {
   SummaryRow,
 } from "./checkout.styles";
 
-import "../main-page/main-page.styles.css";
-
 const CheckoutPage = ({
   cartItems,
   total,

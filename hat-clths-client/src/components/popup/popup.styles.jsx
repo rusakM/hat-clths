@@ -13,11 +13,16 @@ export const PopupContainer = styled.div`
 export const PopupContent = styled.div`
   position: absolute;
   background-color: #fff;
-  width: 50%;
+  width: 60%;
   min-height: 200px;
   top: 50%;
   transform: translateY(-50%);
-  left: 25%;
+  left: 20%;
   border: 1px solid #000;
   padding: 1em;
+
+  @media (max-width: 480px) {
+    width: 95%;
+    left: 2.5%;
+  }
 `;

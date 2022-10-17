@@ -16,6 +16,6 @@ export const AddressContainer = styled.div`
 export const AddressForm = styled.form`
   display: flex;
   flex-direction: column;
-  justify-contnet: space-sround;
+  justify-content: space-around;
   align-items: center;
 `;

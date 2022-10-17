@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { createStructuredSelector } from "reselect";
+import { useMediaQuery } from "react-responsive";
 
 import { selectOneProduct } from "../../redux/products/product.selectors";
 import { selectCurrentUser } from "../../redux/user/user.selectors";
@@ -15,6 +16,7 @@ import ThumbnailsList from "../thumbnails-list/thumbnails-list.component";
 import CustomSelect from "../custom-select/custom-select.component";
 import Review from "../review/review.component";
 import Stars from "../stars/stars.component";
+import Popup from "../popup/popup.component";
 
 import formatPrice from "../../utils/formatPrice";
 import calculateAverageRating from "./calculateAverage";
@@ -77,6 +79,11 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
     }
   }
 
+  const isMobile = useMediaQuery({
+    maxWidth: 480,
+  });
+  const popupButtonClass = isMobile ? "small-button" : "";
+
   const [photoIndex, setPhotoIndex] = useState(defaultPhoto);
   const [selectedSize, setSize] = useState(
     availableSizesList.length > 0 ? availableSizesList[0].value : null
@@ -84,6 +91,7 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
   const [showedReviews, setShowedReviews] = useState(10);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
+  const [productAddedStatus, setProductAddedStatus] = useState(false);
 
   const selectCoverPhoto = (index) => {
     setPhotoIndex(index);
@@ -117,6 +125,7 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
 
   const addToCart = () => {
     addItem(createProductToCart(product, selectedSize));
+    setProductAddedStatus(true);
   };
 
   return (
@@ -171,6 +180,29 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
           <DescriptionContainer>
             <p>{description && description}</p>
           </DescriptionContainer>
+          {productAddedStatus && (
+            <Popup>
+              <h2>Dodano do koszyka</h2>
+              <div
+                className="row space-around"
+                style={{
+                  paddingTop: "1em",
+                }}
+              >
+                <CustomButton
+                  onClick={() => setProductAddedStatus(false)}
+                  className={popupButtonClass}
+                >
+                  Kupuj dalej
+                </CustomButton>
+                <Link to="/cart">
+                  <CustomButton className={popupButtonClass}>
+                    Koszyk
+                  </CustomButton>
+                </Link>
+              </div>
+            </Popup>
+          )}
         </ProductContainer>
       </ProductPageInfoContainer>
       <ReviewsContainer>
