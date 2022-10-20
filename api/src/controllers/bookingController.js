@@ -44,6 +44,10 @@ exports.protectBooking = catchAsync(async (req, res, next) => {
     return next(new AppError("Nieprawidłowy kod dostępu", 404));
   }
 
+  if (!req.user) {
+    req.user = booking.user;
+  }
+
   next();
 });
 
@@ -95,7 +99,7 @@ exports.userVerification = catchAsync(async (req, res, next) => {
     user: userFromDb._id,
   };
   req.booking.accessToken = accessToken;
-
+  req.user = userFromDb;
   console.log("1. user ok");
 
   next();
@@ -170,9 +174,8 @@ exports.invoiceValidation = catchAsync(async (req, res, next) => {
   const { invoiceAddress, invoice, isWithInvoice } = req.body;
   const { user } = req.booking;
 
-  console.log(invoice);
-
   if (!isWithInvoice) {
+    console.log("3. invoice ok");
     return next();
   }
 
@@ -225,7 +228,6 @@ exports.createBooking = catchAsync(async (req, res, next) => {
     products,
     coupon,
   } = req.body;
-  console.log(booking);
   if (!deliveryType || paymentInAdvance === undefined) {
     return next(
       new AppError("Wystąpił problem z wyborem sposobu dostawy", 404)
@@ -303,7 +305,8 @@ exports.getNewBooking = catchAsync(async (req, res, next) => {
   newBooking = newBooking.toObject();
 
   req.newBooking = newBooking;
-
+  console.log("New booking: ", newBooking);
+  console.log("6. population ok");
   next();
 });
 
@@ -312,7 +315,7 @@ exports.getNewBooking = catchAsync(async (req, res, next) => {
 exports.sendEmail = catchAsync(async (req, res, next) => {
   const { newBooking } = req;
   newBooking.price = formatPrice(newBooking.price);
-  if (req.user.role === "użytkownik") {
+  if (!req.user.role || req.user.role === "użytkownik") {
     const { WEBPAGE_PORT, WEBPAGE_DOMAIN } = process.env;
     const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
       WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
@@ -320,27 +323,26 @@ exports.sendEmail = catchAsync(async (req, res, next) => {
     const backendUrl = `${req.protocol}://${req.get("host")}`;
     await new Email(req.user, url, backendUrl).sendBooking(newBooking);
   }
-
+  console.log("7. email ok");
   next();
 });
 
 // 8 return booking
 
 exports.checkPaymentType = catchAsync(async (req, res, next) => {
-  const { _id, paymentMethod } = req.newBooking;
+  const { paymentMethod } = req.newBooking;
 
-  let newBooking = await Booking.findById(_id);
-  newBooking = newBooking.toObject();
   if (paymentMethod === false) {
+    console.log("8. payment type checking ok");
     res.status(200).json({
       status: "success",
       data: {
-        data: newBooking,
+        data: req.newBooking,
       },
     });
   }
 
-  req.newBooking = newBooking;
+  console.log("8. payment type checking ok");
 
   next();
 });
@@ -388,6 +390,7 @@ exports.mapBookingForPaymentSession = (req, res, next) => {
   });
 
   req.lineItems = lineItems;
+  console.log("9. products mapped");
   next();
 };
 
@@ -419,6 +422,9 @@ exports.createPaymentSession = catchAsync(async (req, res, next) => {
     mode: "payment",
     line_items: lineItems,
   });
+
+  console.log("10. payment session created");
+
   res.status(200).json({
     status: "success",
     data: {

@@ -16,6 +16,7 @@ const bookingReducer = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         isFetching: true,
+        error: null,
       };
     case bookingTypes.CREATE_BOOKING_SUCCESS:
     case bookingTypes.FETCH_BOOKING_SUCCESS:

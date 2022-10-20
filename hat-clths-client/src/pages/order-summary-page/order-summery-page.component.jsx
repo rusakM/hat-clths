@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -37,8 +38,10 @@ import {
   selectAddressForInvoice,
   selectIsWithInvoice,
 } from "../../redux/address/address.selectors";
+
+import { AppError } from "../../api/api.functions";
 import {
-  PageConstainer,
+  PageContainer,
   ContainersRow,
   BackBtn,
 } from "./order-summary-page.styles";
@@ -52,32 +55,46 @@ const OrderSummaryPage = ({
   invoice,
   invoiceAddress,
   isWithInvoice,
-  bookingIsLoading,
   bookingError,
   booking,
+  loadingData,
   fetchAddressStart,
   createBookingStart,
   createBookingFailure,
 }) => {
+  const redirect = useNavigate();
+  const [bookingStatus, setBookingStatus] = useState(false);
+
   useEffect(() => {
     fetchAddressStart();
   }, [fetchAddressStart]);
 
   useEffect(() => {
     const tryRedirectToPaymentSession = async (bookingData) => {
-      if (!(await redirectToPaymentSession(bookingData))) {
-        console.log("płatność za pobraniem");
+      if (bookingStatus && !bookingError && !loadingData) {
+        if (!(await redirectToPaymentSession(bookingData))) {
+          const { _id, accessToken } = bookingData;
+          redirect(`/booking-complete/${_id}?accessToken=${accessToken}`);
+        }
       }
     };
     if (booking) {
       tryRedirectToPaymentSession(booking);
     }
-  }, [booking]);
+  }, [booking, redirect, bookingStatus, bookingError, loadingData]);
 
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const createBooking = () => {
-    const booking = {
+    if (!deliveryAddress) {
+      createBookingFailure(
+        new AppError(
+          "Proszę wybrać adres dostawy z listy, lub zapisać nowy korzystając z formularza powyżej",
+          404
+        )
+      );
+    }
+    const bookingObj = {
       address: deliveryAddress,
       products: cartItems,
       user: deliveryAddress.user,
@@ -91,18 +108,19 @@ const OrderSummaryPage = ({
     };
 
     try {
-      setIsLoading(true);
-      validateBooking(booking);
+      // setIsLoading(true);
+      validateBooking(bookingObj);
 
-      createBookingStart(booking);
+      createBookingStart(bookingObj);
+      setBookingStatus(true);
     } catch (error) {
-      setIsLoading(false);
+      // setIsLoading(false);
       createBookingFailure(error);
     }
   };
 
   return (
-    <PageConstainer>
+    <PageContainer>
       <BackBtn to="/cart">
         <FontAwesomeIcon icon={faChevronLeft} />
         &nbsp;Powrót do koszyka
@@ -115,16 +133,18 @@ const OrderSummaryPage = ({
         <Address />
         <Invoice />
       </ContainersRow>
-      <div className="centered-div" style={{ padding: "1em" }}>
-        <CustomButton onClick={createBooking}>Złóż zamówienie</CustomButton>
-        {isLoading && <SmallSpinner />}
-      </div>
       {bookingError && bookingError.message && (
         <div className="centered-div">
-          <p>{bookingError.message}</p>
+          <p style={{ color: "#ff0000", textAlign: "center" }}>
+            {bookingError.message}
+          </p>
         </div>
       )}
-    </PageConstainer>
+      <div className="centered-div" style={{ padding: "1em" }}>
+        <CustomButton onClick={createBooking}>Złóż zamówienie</CustomButton>
+        {loadingData && <SmallSpinner />}
+      </div>
+    </PageContainer>
   );
 };
 
@@ -137,9 +157,9 @@ const mapStateToProps = createStructuredSelector({
   invoice: selectCurrentInvoice,
   invoiceAddress: selectAddressForInvoice,
   isWithInvoice: selectIsWithInvoice,
-  bookingIsLoading: selectIsFetchingData,
   bookingError: selectError,
   booking: selectBooking,
+  loadingData: selectIsFetchingData,
 });
 
 const mapDispatchToProps = (dispatch) => ({

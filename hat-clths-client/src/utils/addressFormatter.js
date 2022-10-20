@@ -10,7 +10,7 @@ export const formatAddress = (address) => {
   } = address;
 
   const streetRow = `ul. ${street} ${houseNumber} ${
-    flatNumber && `, m. ${flatNumber}`
+    flatNumber ? `, m. ${flatNumber}` : ""
   }`;
 
   return [name, email, streetRow, `${zipCode} ${city}`, phoneNumber];

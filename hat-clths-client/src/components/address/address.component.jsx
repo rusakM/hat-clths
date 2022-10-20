@@ -62,7 +62,7 @@ const Address = ({
 
   return (
     <AddressContainer>
-      <h2>Adres dostawy:</h2>
+      <h2>Wybierz adres dostawy z listy:</h2>
       <Suspense fallback={<Spinner />}>
         {addressList.length > 0 && (
           <AddressCardList
@@ -72,6 +72,9 @@ const Address = ({
         )}
       </Suspense>
       <AddressForm onSubmit={createAddress}>
+        <SummaryRow>
+          <h2>Lub wypełnij formularz:</h2>
+        </SummaryRow>
         {!currentUser && (
           <FormInput
             name="name"

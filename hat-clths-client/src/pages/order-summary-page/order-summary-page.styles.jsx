@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-export const PageConstainer = styled.div`
+export const PageContainer = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
