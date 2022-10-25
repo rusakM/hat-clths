@@ -17,7 +17,9 @@ exports.signUp = catchAsync(async (req, res, next) => {
   } else {
     newsletter = newsletter.toObject();
     const { WEBPAGE_DOMAIN, WEBPAGE_PORT } = process.env;
-    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    const backendUrl = `${req.protocol}://${WEBPAGE_DOMAIN}${
+      WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
+    }`;
     const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
       WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
     }`;

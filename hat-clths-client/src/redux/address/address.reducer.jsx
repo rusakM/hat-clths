@@ -8,6 +8,7 @@ const INITIAL_STATE = {
   selectedInvoice: null,
   addressError: null,
   addressForInvoice: null,
+  createError: null,
 };
 
 const addressReducer = (state = INITIAL_STATE, action) => {
@@ -40,6 +41,13 @@ const addressReducer = (state = INITIAL_STATE, action) => {
         ...state,
         addressList,
         selectedAddress: action.payload,
+        createError: null,
+      };
+    case addressTypes.CREATE_ADDRESS_FAILURE:
+      return {
+        ...state,
+        createError: action.payload,
+        isFetching: false,
       };
     case addressTypes.CREATE_INVOICE:
       let list = state.addressList.map((address) => {

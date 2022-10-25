@@ -237,7 +237,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   try {
     const { WEBPAGE_PORT, WEBPAGE_DOMAIN } = process.env;
-    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    const backendUrl = `${req.protocol}://${WEBPAGE_DOMAIN}${
+      WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
+    }`;
     const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
       WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
     }/reset-password/${resetToken}`;

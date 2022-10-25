@@ -12,6 +12,11 @@ export const selectAddressError = createSelector(
   (address) => address.addressError
 );
 
+export const selectCreateAddressError = createSelector(
+  [selectAddress],
+  (address) => address.createError
+);
+
 export const selectCurrentAddress = createSelector(
   [selectAddress],
   (address) => address.selectedAddress

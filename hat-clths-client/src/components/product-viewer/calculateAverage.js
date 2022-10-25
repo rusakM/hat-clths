@@ -7,7 +7,7 @@ const calculateAverageRating = (reviews) => {
     .map(({ rating }) => rating)
     .reduce((total, val) => total + val);
 
-  return sum / reviews.length;
+  return Math.round((sum / reviews.length) * 10) / 10;
 };
 
 export default calculateAverageRating;

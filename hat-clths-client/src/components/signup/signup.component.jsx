@@ -6,8 +6,10 @@ import { useMediaQuery } from "react-responsive";
 import FormInput from "../../components/form-input/form-input.component";
 import CustomButton from "../../components/custom-button/custom-button.component";
 
-import { signUpStart } from "../../redux/user/user.actions";
+import { signUpStart, signUpFailure } from "../../redux/user/user.actions";
 import { selectSignUpError } from "../../redux/user/user.selectors";
+import { validateField } from "../address/address.validator";
+import { validatePasswords } from "./signup.validator";
 
 import {
   LoginContainer,
@@ -17,7 +19,12 @@ import {
   Register,
 } from "../login/login.styles";
 
-const SignUp = ({ signUpStart, signUpError, toggleRegistration }) => {
+const SignUp = ({
+  signUpStart,
+  signUpError,
+  toggleRegistration,
+  signUpFailure,
+}) => {
   const isMobile = useMediaQuery({
     maxWidth: 480,
   });
@@ -32,7 +39,14 @@ const SignUp = ({ signUpStart, signUpError, toggleRegistration }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    signUpStart(userCredentials);
+    try {
+      validateField(email, "email");
+      validatePasswords(password, passwordConfirm);
+      signUpStart(userCredentials);
+    } catch (error) {
+      console.log("error");
+      signUpFailure(error);
+    }
   };
 
   const handleChange = (e) => {
@@ -93,6 +107,7 @@ const SignUp = ({ signUpStart, signUpError, toggleRegistration }) => {
 
 const mapDispatchToProps = (dispatch) => ({
   signUpStart: (userData) => dispatch(signUpStart(userData)),
+  signUpFailure: (error) => dispatch(signUpFailure(error)),
 });
 
 const mapStateToProps = createStructuredSelector({

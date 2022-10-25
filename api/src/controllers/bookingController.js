@@ -320,7 +320,9 @@ exports.sendEmail = catchAsync(async (req, res, next) => {
     const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
       WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
     }/bookings/${newBooking._id}?accessToken=${newBooking.accessToken}`;
-    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    const backendUrl = `${req.protocol}://${WEBPAGE_DOMAIN}${
+      WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
+    }`;
     await new Email(req.user, url, backendUrl).sendBooking(newBooking);
   }
   console.log("7. email ok");
@@ -507,7 +509,9 @@ exports.payForBooking = catchAsync(async (req, res, next) => {
     const url = `${req.protocol}://${WEBPAGE_DOMAIN}${
       WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
     }/bookings/${req.params.id}?accessToken=${doc.accessToken}`;
-    const backendUrl = `${req.protocol}://${req.get("host")}`;
+    const backendUrl = `${req.protocol}://${WEBPAGE_DOMAIN}${
+      WEBPAGE_PORT ? `:${WEBPAGE_PORT}` : ""
+    }`;
     await new Email(req.user, url, backendUrl).sendBookingPaid(doc);
   }
 

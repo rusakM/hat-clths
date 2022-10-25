@@ -19,6 +19,11 @@ export const createAddress = (addressData, user) => ({
   payload: { ...addressData, user },
 });
 
+export const createAddressFailure = (error) => ({
+  type: addressTypes.CREATE_ADDRESS_FAILURE,
+  payload: error,
+});
+
 export const createInvoice = (invoiceData) => ({
   type: addressTypes.CREATE_INVOICE,
   payload: { ...invoiceData },

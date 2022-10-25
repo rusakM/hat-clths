@@ -9,13 +9,16 @@ import CustomButton from "../custom-button/custom-button.component";
 import {
   createAddress,
   selectAddress,
+  createAddressFailure,
 } from "../../redux/address/address.actions";
 import {
   selectAddressList,
   selectCurrentAddress,
+  selectCreateAddressError,
 } from "../../redux/address/address.selectors";
 import { selectCurrentUser } from "../../redux/user/user.selectors";
 import INITIAL_STATE from "./address.state";
+import { validateField } from "./address.validator";
 
 import { AddressContainer, AddressForm } from "./address.styles";
 import { SummaryRow } from "../../pages/checkout/checkout.styles";
@@ -28,8 +31,10 @@ const Address = ({
   addressList,
   currentUser,
   currentAddress,
+  addressFailure,
   createNewAddress,
   selectAddress,
+  createAddressFailure,
 }) => {
   const [addressData, setAddressData] = useState(INITIAL_STATE);
   const [userData, setUserData] = useState({
@@ -56,8 +61,20 @@ const Address = ({
 
   const createAddress = (event) => {
     event.preventDefault();
-    const user = currentUser ? currentUser : { ...userData, isNew: true };
-    createNewAddress(addressData, user);
+    try {
+      const user = currentUser ? currentUser : { ...userData, isNew: true };
+      Object.keys(addressData).forEach((key) => {
+        validateField(addressData[key], key);
+      });
+      if (!currentUser) {
+        Object.keys(userData).forEach((key) => {
+          validateField(userData[key], key);
+        });
+      }
+      createNewAddress(addressData, user);
+    } catch (error) {
+      createAddressFailure(error);
+    }
   };
 
   return (
@@ -146,6 +163,7 @@ const Address = ({
           required
           wide
         />
+        {addressFailure && <p>{addressFailure.message}</p>}
         <CustomButton type="submit">Zapisz adres</CustomButton>
       </AddressForm>
     </AddressContainer>
@@ -156,12 +174,14 @@ const mapStateToProps = createStructuredSelector({
   addressList: selectAddressList,
   currentUser: selectCurrentUser,
   currentAddress: selectCurrentAddress,
+  addressFailure: selectCreateAddressError,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   createNewAddress: (addressData, user) =>
     dispatch(createAddress(addressData, user)),
   selectAddress: (address) => dispatch(selectAddress(address)),
+  createAddressFailure: (error) => dispatch(createAddressFailure(error)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Address);
