@@ -2,7 +2,6 @@ import validator from "validator";
 import { AppError } from "../../api/api.functions";
 
 export const validateField = (value, field) => {
-  console.log(field, value);
   const reg = new RegExp(/^[A-Z]/);
   switch (field) {
     case "city":
@@ -31,7 +30,7 @@ export const validateField = (value, field) => {
       if (!value) {
         break;
       }
-      if (!validator.isNumeric(value) || !validator.isEmpty(value)) {
+      if (!validator.isNumeric(`${value}`) && !validator.isEmpty(`${value}`)) {
         throw new AppError("Nieprawidłowy numer mieszkania", 404);
       }
       break;
