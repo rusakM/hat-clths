@@ -1,7 +1,7 @@
 const express = require("express");
 const bookingController = require("../controllers/bookingController");
 const authController = require("../controllers/authController");
-const bookingStatusController = require("../controllers/bookingStatusController");
+const productBoughtController = require("../controllers/productBoughtController");
 
 const router = express.Router();
 
@@ -28,6 +28,13 @@ router
     bookingController.mapBookingForPaymentSession,
     bookingController.createPaymentSession
   );
+
+router.get(
+  "/boughts",
+  authController.protect,
+  authController.restrictTo("admin"),
+  productBoughtController.getAllProductBoughts
+);
 
 router
   .route("/:id")

@@ -45,7 +45,7 @@ productBoughtSchema.pre("save", function (next) {
   next();
 });
 
-productBoughtSchema.pre(/^findOne/, function (next) {
+productBoughtSchema.pre(/^find/, function (next) {
   if (this.options._recursed) {
     return next();
   }
@@ -63,6 +63,11 @@ productBoughtSchema.pre(/^findOne/, function (next) {
     .populate({
       path: "category",
       select: "-__v",
+      options: { _recursed: true },
+    })
+    .populate({
+      path: "user",
+      select: "_id id email name role",
       options: { _recursed: true },
     });
 
