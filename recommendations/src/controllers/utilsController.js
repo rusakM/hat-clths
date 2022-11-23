@@ -1,23 +1,21 @@
-const axios = require("axios");
+const superagent = require("superagent");
 
 exports.loginAsAdmin = async () => {
   if (global.loginToken) {
     return global.loginToken;
   }
   const url = `${process.env.API}/api/users/login`;
-
   try {
-    const loginData = await axios({
-      url,
-      method: "POST",
-      data: {
+    const loginData = await superagent
+      .post(url)
+      .send({
         email: process.env.API_USERNAME,
         password: process.env.API_PASSWORD,
-      },
-    });
+      })
+      .set("accept", "json");
 
     if (loginData) {
-      return loginData.data.token;
+      return loginData._body.token;
     }
   } catch (error) {
     console.log(error);

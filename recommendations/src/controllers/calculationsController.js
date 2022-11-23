@@ -1,4 +1,4 @@
-const axios = require("axios");
+const superagent = require("superagent");
 const utilsController = require("./utilsController");
 const uniqueSet = require("../utils/uniqueSet");
 const matrixUtils = require("../utils/matrixUtils");
@@ -58,31 +58,27 @@ const fetchArrays = async () => {
       method: "GET",
     };
 
-    const users = await axios({
-      url: `${process.env.API}/api/users?limit=999999`,
-      ...options,
-    });
+    const users = await superagent
+      .get(`${process.env.API}/api/users?limit=999999`)
+      .set("Authorization", `Bearer ${token}`);
 
-    const boughts = await axios({
-      url: `${process.env.API}/api/bookings/boughts?limit=999999`,
-      ...options,
-    });
+    const boughts = await superagent
+      .get(`${process.env.API}/api/bookings/boughts?limit=999999`)
+      .set("Authorization", `Bearer ${token}`);
 
-    const products = await axios({
-      url: `${process.env.API}/api/products?limit=999`,
-      ...options,
-    });
+    const products = await superagent
+      .get(`${process.env.API}/api/products?limit=999`)
+      .set("Authorization", `Bearer ${token}`);
 
-    const categories = await axios({
-      url: `${process.env.API}/api/categories`,
-      ...options,
-    });
+    const categories = await superagent
+      .get(`${process.env.API}/api/categories`)
+      .set("Authorization", `Bearer ${token}`);
 
     return {
-      users: users.data.data.data,
-      boughts: boughts.data.data.data,
-      products: products.data.data.data,
-      categories: categories.data.data.data,
+      users: users._body.data.data,
+      boughts: boughts._body.data.data,
+      products: products._body.data.data,
+      categories: categories._body.data.data,
     };
   } catch (error) {
     console.log(error);
