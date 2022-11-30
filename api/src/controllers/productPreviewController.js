@@ -407,3 +407,5 @@ exports.getProductsByGender = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getAllProductShows = factory.getAll(ProductShow);

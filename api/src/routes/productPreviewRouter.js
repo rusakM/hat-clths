@@ -23,6 +23,12 @@ router.get(
 );
 
 router.get(
+  "/shows",
+  authController.protect,
+  authController.restrictTo("admin"),
+  productPreviewController.getAllProductShows
+);
+router.get(
   "/:id",
   authController.tryProtect,
   productPreviewController.showProduct,

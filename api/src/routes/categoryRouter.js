@@ -12,6 +12,12 @@ router.get(
   productPreviewController.getProductsByGender
 );
 router.get("/for-her/products", productPreviewController.getProductsByGender);
+router.get(
+  "/shows",
+  authController.protect,
+  authController.restrictTo("admin"),
+  categoryController.getCategoryShows
+);
 
 router.get("/", categoryController.getCategories);
 

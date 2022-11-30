@@ -93,3 +93,5 @@ exports.resizePhoto = catchAsync(async (req, res, next) => {
   req.body.picture = req.file.filename;
   next();
 });
+
+exports.getCategoryShows = factory.getAll(CategoryShow);
