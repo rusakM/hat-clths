@@ -163,6 +163,8 @@ exports.createProductsDetailsList = (
     boughts
   );
 
+  productsList = this.calculateTopSimilarProducts(productsList);
+
   return productsList;
 };
 
@@ -267,5 +269,44 @@ exports.calculateUsersRankForProduct = (dataset, shows, boughts) => {
 
 exports.calculateTopSimilarProducts = (dataset) => {
   for (let item in dataset) {
+    const arr1 = dataset[item].usersList;
+    const similarProducts = [];
+
+    for (let item2 in dataset) {
+      if (item === item2) {
+        continue;
+      }
+
+      const arr2 = dataset[item2].usersList;
+      let usersSimilarities = [];
+      let productScore = 0;
+      if (arraysUtils.isObjArraysSimilarity(arr1, arr2, "user")) {
+        usersSimilarities = arraysUtils.getArraysSimilarities(
+          arr1,
+          arr2,
+          "user"
+        );
+      }
+
+      if (usersSimilarities.length > 0) {
+        productScore =
+          usersSimilarities.reduce((total, val) => total + val.score) * 2;
+        productScore += dataset[item2].productShows / 0.7;
+        productScore += dataset[item2].productBoughts;
+        productScore /= 3.7;
+        similarProducts.push({
+          product: item2,
+          score: productScore,
+        });
+      }
+    }
+
+    if (similarProducts.length > 0) {
+      dataset[item].topSimilarProducts = similarProducts.sort(
+        (a, b) => b.score - a.score
+      );
+    }
   }
+
+  return dataset;
 };

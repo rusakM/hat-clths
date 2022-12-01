@@ -3204,3 +3204,22 @@ itemsArr = itemsArr.sort((a, b) => b.productShows - a.productShows);
 for (let i = 0; i < 10; i++) {
   console.log(itemsArr[i]);
 }
+
+const isObjArraysSimilarity = (arr1, arr2, field) => {
+  if (arr1.length === 0 || arr2.length === 0) {
+    return false;
+  }
+
+  for (let item of arr1) {
+    console.log(item);
+    const filtered = arr2.filter((i) => i[field] === item[field]);
+
+    if (filtered.length > 0) {
+      return true;
+    }
+  }
+  return false;
+};
+
+console.log(isObjArraysSimilarity([{ m: 1 }, { m: 2 }], [{ m: 1 }], "m"));
+console.log(isObjArraysSimilarity([{ m: 1 }, { m: 2 }], [{ m: 0 }], "m"));
