@@ -15,17 +15,23 @@ exports.recommendations = catchAsync(async (req, res, next) => {
 });
 
 exports.makeRecommendations = async () => {
+  // 1) get data
+
   const arrays = await fetchArrays();
   if (!arrays) {
     console.log("Arrays error");
     return null;
   }
 
+  // 2) prepare datasets
+
   const usersSet = uniqueSet.createSet(arrays.users.map(({ id }) => id));
   const productsSet = uniqueSet.createSet(arrays.products.map(({ id }) => id));
   const categoriesSet = uniqueSet.createSet(
     arrays.products.map(({ id }) => id)
   );
+
+  // 3) prepare pivot tables
 
   const boughtsMatrix = matrixUtils.createBoughtsMatrix(
     usersSet,
@@ -45,6 +51,9 @@ exports.makeRecommendations = async () => {
     arrays.categoryShows
   );
 
+  // Colaborative filtering
+
+  // calculate user similarities
   const usersMatrix = matrixUtils.createUsersMatrix(usersSet);
   for (let user1 of usersSet) {
     for (let user2 of usersSet) {
@@ -72,12 +81,18 @@ exports.makeRecommendations = async () => {
     }
   }
 
+  // calculate product similarities
   const productDetailsList = matrixUtils.createProductsDetailsList(
     productsSet,
     arrays.products,
     arrays.boughts,
-    arrays.productShows
+    arrays.productShows,
+    arrays.categories,
+    arrays.categoryShows,
+    usersSet
   );
+
+  // calculate categories rank
 
   const categoriesDetailsList = matrixUtils.createCategoriesRank(
     arrays.categories,
@@ -85,7 +100,7 @@ exports.makeRecommendations = async () => {
     arrays.categoryShows
   );
 
-  // Colaborative filtering
+  // calculate user recommendations
 
   console.log("calc time: ", Date.now() - arrays.time, "ms");
   return {

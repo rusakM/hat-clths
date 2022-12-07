@@ -103,7 +103,10 @@ exports.createProductsDetailsList = (
   productsSet,
   productsArr,
   boughts,
-  shows
+  shows,
+  categories,
+  categoriesShows,
+  usersSet
 ) => {
   let productsList = {};
 
@@ -157,15 +160,26 @@ exports.createProductsDetailsList = (
   );
   productsList = this.calculateRank(productsList, "showsRank", "productShows");
 
+  const usersPreferences = this.calculateUsersPreferences(
+    usersSet,
+    shows,
+    boughts,
+    categories,
+    categoriesShows
+  );
   productsList = this.calculateUsersRankForProduct(
     productsList,
     shows,
-    boughts
+    boughts,
+    usersPreferences
   );
 
   productsList = this.calculateTopSimilarProducts(productsList);
 
-  return productsList;
+  return {
+    productsList,
+    usersPreferences,
+  };
 };
 
 exports.createCategoriesRank = (categories, boughts, shows) => {
@@ -222,7 +236,12 @@ exports.calculateRank = (dataset, field, fieldSort, asc = false) => {
   return nd;
 };
 
-exports.calculateUsersRankForProduct = (dataset, shows, boughts) => {
+exports.calculateUsersRankForProduct = (
+  dataset,
+  shows,
+  boughts,
+  usersPreferences
+) => {
   for (let item in dataset) {
     const itemsShows = shows.filter(
       (show) => show.productPreview === item && show.user
@@ -257,6 +276,11 @@ exports.calculateUsersRankForProduct = (dataset, shows, boughts) => {
 
     for (let user in usersObj) {
       usersObj[user] /= 1.7;
+      usersObj[user] = calculateGenderFactor(
+        usersObj[user],
+        usersPreferences[user],
+        dataset[item].category.gender
+      );
       arr.push({ user, score: usersObj[user] });
     }
 
@@ -267,10 +291,28 @@ exports.calculateUsersRankForProduct = (dataset, shows, boughts) => {
   return dataset;
 };
 
-exports.calculateTopSimilarProducts = (dataset) => {
+const calculateGenderFactor = (userScore, userPref, itemGender) => {
+  let add = 0;
+  if (itemGender) {
+    add = userScore * userPref;
+  } else {
+    add = userScore * userPref * -1;
+  }
+
+  return userScore + add;
+};
+
+exports.calculateTopSimilarProducts = (dataset, usersPreferences) => {
   for (let item in dataset) {
     const arr1 = dataset[item].usersList;
-    const similarProducts = [];
+    let similarProducts = [];
+    const category1 = dataset[item].category;
+    let topCategoryProducts = [];
+
+    if (arr1.length === 0) {
+      dataset[item].topSimilarProducts = [];
+      continue;
+    }
 
     for (let item2 in dataset) {
       if (item === item2) {
@@ -280,6 +322,7 @@ exports.calculateTopSimilarProducts = (dataset) => {
       const arr2 = dataset[item2].usersList;
       let usersSimilarities = [];
       let productScore = 0;
+      const category2 = dataset[item2].category;
       if (arraysUtils.isObjArraysSimilarity(arr1, arr2, "user")) {
         usersSimilarities = arraysUtils.getArraysSimilarities(
           arr1,
@@ -290,23 +333,133 @@ exports.calculateTopSimilarProducts = (dataset) => {
 
       if (usersSimilarities.length > 0) {
         productScore =
-          usersSimilarities.reduce((total, val) => total + val.score) * 2;
+          usersSimilarities
+            .map(({ score }) => score)
+            .reduce((total, val) => total + val) * 2;
         productScore += dataset[item2].productShows / 0.7;
         productScore += dataset[item2].productBoughts;
         productScore /= 3.7;
+        if (category1.gender === category2.gender) {
+          productScore *= 1.2;
+        } else {
+          productScore *= 0.25;
+        }
+        if (category1.id === category2.id) {
+          productScore *= 1.5;
+        }
         similarProducts.push({
           product: item2,
           score: productScore,
         });
       }
+
+      if (category1.id === category2.id && item !== item2) {
+        const { soldItems, productShows, productBoughts } = dataset[item2];
+        topCategoryProducts.push({
+          product: item2,
+          score: (soldItems + productShows + productBoughts) / 3,
+        });
+      }
     }
 
     if (similarProducts.length > 0) {
-      dataset[item].topSimilarProducts = similarProducts.sort(
-        (a, b) => b.score - a.score
+      similarProducts = similarProducts.sort((a, b) => b.score - a.score);
+      dataset[item].topSimilarProducts = similarProducts;
+    } else {
+      dataset[item].topSimilarProducts = topCategoryProducts.sort(
+        (a, b) => a.score - b.score
       );
     }
   }
 
   return dataset;
+};
+
+exports.calculateUsersPreferences = (
+  usersSet,
+  shows,
+  boughts,
+  categories,
+  categoriesShows
+) => {
+  const usersList = {};
+  const categoriesList = {};
+
+  for (let user of usersSet) {
+    usersList[user] = 0;
+  }
+
+  for (let category of categories) {
+    categoriesList[category._id] = category.gender;
+  }
+  for (let user in usersList) {
+    let mensPt = 0;
+    let womensPt = 0;
+
+    const userBoughts = boughts.filter((item) => item.user.id === user);
+    const userShows = shows.filter((item) => item.user === user);
+
+    const userCategoryShows = categoriesShows.filter(
+      (item) => item.user === user
+    );
+
+    // console.log(
+    //   `Boughts: ${userBoughts.length}, Shows: ${userShows.length}, CatShows: ${userCategoryShows.length}`
+    // );
+    if (
+      userBoughts.length === 0 &&
+      userShows.length === 0 &&
+      userCategoryShows.legth === 0
+    ) {
+      usersList[user] = 0;
+      continue;
+    }
+
+    for (let bought of userBoughts) {
+      if (user === "638b0e326316a66590df69bb") {
+        console.log(bought.productPreview.id);
+      }
+      if (categoriesList[bought.category.id]) {
+        mensPt++;
+      } else {
+        womensPt++;
+      }
+    }
+
+    for (let show of userShows) {
+      if (user === "638b0e326316a66590df69bb") {
+        console.log(show.productPreview);
+      }
+      if (categoriesList[show.category]) {
+        mensPt += 0.5;
+      } else {
+        womensPt += 0.5;
+      }
+    }
+    if (user === "638b0e326316a66590df69bb") {
+      console.log("categories");
+    }
+
+    for (let categoryShow of userCategoryShows) {
+      if (user === "638b0e326316a66590df69bb") {
+        console.log(categoryShow.category);
+      }
+      if (categoriesList[categoryShow.category]) {
+        mensPt += 0.25;
+      } else {
+        womensPt += 0.25;
+      }
+    }
+
+    // console.log(`pt: m ${mensPt}, w ${womensPt}`);
+    if (mensPt === womensPt) {
+      usersList[user] = 0;
+    } else if (mensPt > womensPt) {
+      usersList[user] = (mensPt - womensPt) / mensPt;
+    } else {
+      usersList[user] = ((womensPt - mensPt) / womensPt) * -1;
+    }
+  }
+
+  return usersList;
 };
