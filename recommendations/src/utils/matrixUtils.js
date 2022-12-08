@@ -1,4 +1,5 @@
 const arraysUtils = require("./arraysUtils");
+const factorsList = require("./factorsList");
 
 exports.createBoughtsMatrix = (usersSet, productsSet, boughts) => {
   const matrix = {};
@@ -165,7 +166,8 @@ exports.createProductsDetailsList = (
     shows,
     boughts,
     categories,
-    categoriesShows
+    categoriesShows,
+    productsList
   );
   productsList = this.calculateUsersRankForProduct(
     productsList,
@@ -258,7 +260,7 @@ exports.calculateUsersRankForProduct = (
       if (!usersObj[user]) {
         usersObj[user] = 0;
       }
-      usersObj[user] += 0.7;
+      usersObj[user] += factorsList.SHOW;
     }
 
     for (let bought of itemBoughts) {
@@ -275,7 +277,7 @@ exports.calculateUsersRankForProduct = (
     let arr = [];
 
     for (let user in usersObj) {
-      usersObj[user] /= 1.7;
+      usersObj[user] /= factorsList.SHOW + factorsList.BOUGHT;
       usersObj[user] = calculateGenderFactor(
         usersObj[user],
         usersPreferences[user],
@@ -335,17 +337,18 @@ exports.calculateTopSimilarProducts = (dataset, usersPreferences) => {
         productScore =
           usersSimilarities
             .map(({ score }) => score)
-            .reduce((total, val) => total + val) * 2;
-        productScore += dataset[item2].productShows / 0.7;
+            .reduce((total, val) => total + val) * factorsList.USER_SIMILARITY;
+        productScore += dataset[item2].productShows / factorsList.SHOW;
         productScore += dataset[item2].productBoughts;
-        productScore /= 3.7;
+        productScore /=
+          factorsList.USER_SIMILARITY + factorsList.BOUGHT + factorsList.SHOW;
         if (category1.gender === category2.gender) {
-          productScore *= 1.2;
+          productScore *= factorsList.GENDER_COMP;
         } else {
-          productScore *= 0.25;
+          productScore *= factorsList.GENGER_NOT_COMP;
         }
         if (category1.id === category2.id) {
-          productScore *= 1.5;
+          productScore *= factorsList.IDENTICAL_CATEGORY;
         }
         similarProducts.push({
           product: item2,
@@ -357,7 +360,12 @@ exports.calculateTopSimilarProducts = (dataset, usersPreferences) => {
         const { soldItems, productShows, productBoughts } = dataset[item2];
         topCategoryProducts.push({
           product: item2,
-          score: (soldItems + productShows + productBoughts) / 3,
+          score:
+            (soldItems + productShows + productBoughts) /
+            (factorsList.BOUGHT +
+              factorsList.show +
+              factorsList.CATEGORY_SHOW +
+              factorsList.GENDER_COMP),
         });
       }
     }
@@ -380,7 +388,8 @@ exports.calculateUsersPreferences = (
   shows,
   boughts,
   categories,
-  categoriesShows
+  categoriesShows,
+  productsDataset
 ) => {
   const usersList = {};
   const categoriesList = {};
@@ -403,9 +412,6 @@ exports.calculateUsersPreferences = (
       (item) => item.user === user
     );
 
-    // console.log(
-    //   `Boughts: ${userBoughts.length}, Shows: ${userShows.length}, CatShows: ${userCategoryShows.length}`
-    // );
     if (
       userBoughts.length === 0 &&
       userShows.length === 0 &&
@@ -416,42 +422,29 @@ exports.calculateUsersPreferences = (
     }
 
     for (let bought of userBoughts) {
-      if (user === "638b0e326316a66590df69bb") {
-        console.log(bought.productPreview.id);
-      }
       if (categoriesList[bought.category.id]) {
-        mensPt++;
+        mensPt += factorsList.BOUGHT;
       } else {
-        womensPt++;
+        womensPt += factorsList.BOUGHT;
       }
     }
 
     for (let show of userShows) {
-      if (user === "638b0e326316a66590df69bb") {
-        console.log(show.productPreview);
-      }
-      if (categoriesList[show.category]) {
-        mensPt += 0.5;
+      if (categoriesList[productsDataset[show.productPreview].category.id]) {
+        mensPt += factorsList.SHOW;
       } else {
-        womensPt += 0.5;
+        womensPt += factorsList.SHOW;
       }
-    }
-    if (user === "638b0e326316a66590df69bb") {
-      console.log("categories");
     }
 
     for (let categoryShow of userCategoryShows) {
-      if (user === "638b0e326316a66590df69bb") {
-        console.log(categoryShow.category);
-      }
       if (categoriesList[categoryShow.category]) {
-        mensPt += 0.25;
+        mensPt += factorsList.CATEGORY_SHOW;
       } else {
-        womensPt += 0.25;
+        womensPt += factorsList.CATEGORY_SHOW;
       }
     }
 
-    // console.log(`pt: m ${mensPt}, w ${womensPt}`);
     if (mensPt === womensPt) {
       usersList[user] = 0;
     } else if (mensPt > womensPt) {
@@ -462,4 +455,123 @@ exports.calculateUsersPreferences = (
   }
 
   return usersList;
+};
+
+exports.calculateUserRecommendations = (
+  usersSet,
+  usersSimilaritiesList,
+  categoriesMatrix,
+  productsDataset,
+  shows,
+  boughts,
+  categoriesShows
+) => {
+  //prepare users similarities
+  const usersRecommendations = {};
+
+  for (let user of usersSet) {
+    usersRecommendations[user] = {
+      id: user,
+      recommendedProducts: [],
+      recommendedCategories: [],
+      topCategories: [],
+      topProducts: [],
+      topSimilarUsers: [],
+    };
+
+    for (let user2 of Object.keys(usersSimilaritiesList)) {
+      if (usersSimilaritiesList[user][user2] > 0) {
+        usersRecommendations[user].topSimilarUsers.push({
+          score: usersSimilaritiesList[user][user2],
+        });
+      }
+    }
+
+    usersRecommendations[user].topSimilarUsers.sort(
+      (a, b) => b.score - a.score
+    );
+
+    const userCategoryShows = categoriesShows.filter(
+      (item) => item.user === user
+    );
+    const userCategories = {};
+
+    for (let categoryShow of userCategoryShows) {
+      if (userCategories[categoryShow]) {
+        userCategories[categoryShow].score++;
+      } else {
+        userCategories[categoryShow] = {
+          score: 1,
+        };
+      }
+    }
+
+    usersRecommendations[user].topCategories =
+      arraysUtils.convertObjectToArray(userCategories);
+  }
+
+  return usersRecommendations;
+};
+
+const getUserActionsSet = (userId, shows, boughts, categoriesShows) => {
+  const userActions = {
+    products: {},
+    categories: {},
+  };
+
+  const userBoughts = boughts.filter((item) => item.user.id === user);
+  const userShows = shows.filter((item) => item.user === user);
+
+  const userCategoryShows = categoriesShows.filter(
+    (item) => item.user === user
+  );
+
+  for (let bought of userBoughts) {
+    const { productPreview } = bought;
+    if (userActions.products[productPreview.id]) {
+      userActions.products[productPreview.id].score += factorsList.BOUGHT;
+    } else {
+      userActions.products[productPreview.id] = { score: factorsList.BOUGHT };
+    }
+  }
+
+  for (let show of userShows) {
+    const { productPreview } = show;
+
+    if (userActions.products[productPreview]) {
+      userActions.products[productPreview].score += factorsList.SHOW;
+    } else {
+      userActions.products[productPreview] = { score: factorsList.SHOW };
+    }
+  }
+
+  let multiplier = factorsList.BOUGHT;
+
+  if (userBoughts.length && userShows.length) {
+    multiplier += factorsList.SHOW;
+  } else if (!userBoughts.length && userShows.length) {
+    multiplier = factorsList.SHOW;
+  }
+
+  for (let categoryShow of userCategoryShows) {
+    const { productPreview } = categoryShow;
+
+    if (userActions.categories[productPreview]) {
+      userActions.categories[productPreview].score++;
+    } else {
+      userActions.categories[productPreview] = { score: 1 };
+    }
+  }
+
+  userActions.products = arraysUtils
+    .convertObjectToArray(userActions.products)
+    .map((item) => ({
+      ...item,
+      score: item.score / multiplier,
+    }));
+  userActions.categories = arraysUtils.convertObjectToArray(
+    userActions.categories
+  );
+
+  return userActions;
 };

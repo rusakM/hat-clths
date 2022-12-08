@@ -3,6 +3,7 @@ const utilsController = require("./utilsController");
 const uniqueSet = require("../utils/uniqueSet");
 const matrixUtils = require("../utils/matrixUtils");
 const catchAsync = require("../utils/catchAsync");
+const factorsList = require("../utils/factorsList");
 
 exports.recommendations = catchAsync(async (req, res, next) => {
   const recommendations = await this.makeRecommendations();
@@ -67,16 +68,17 @@ exports.makeRecommendations = async () => {
 
         const showsSimilarity =
           matrixUtils.cosineSimilarity(showsMatrix[user1], showsMatrix[user2]) *
-          0.7;
+          factorsList.SHOW;
 
         const categoriesSimilarity =
           matrixUtils.cosineSimilarity(
             categoriesMatrix[user1],
             categoriesMatrix[user2]
-          ) * 0.3;
+          ) * factorsList.CATEGORIES_SIMILARITY;
 
         usersMatrix[user1][user2] =
-          (boughtsSimilarity + showsSimilarity + categoriesSimilarity) / 2;
+          (boughtsSimilarity + showsSimilarity + categoriesSimilarity) /
+          (factorsList.SHOW + factorsList.CATEGORIES_SIMILARITY);
       }
     }
   }
@@ -101,10 +103,20 @@ exports.makeRecommendations = async () => {
   );
 
   // calculate user recommendations
+  const usersRecommendations = matrixUtils.calculateUserRecommendations(
+    usersSet,
+    usersMatrix,
+    categoriesMatrix,
+    productDetailsList,
+    arrays.productShows,
+    arrays.boughts,
+    arrays.categoryShows
+  );
 
   console.log("calc time: ", Date.now() - arrays.time, "ms");
   return {
     usersMatrix,
+    usersRecommendations,
     productDetailsList,
     categoriesDetailsList,
     boughtsMatrix,

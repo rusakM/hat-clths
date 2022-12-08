@@ -25,3 +25,20 @@ exports.getArraysSimilarities = (arr1, arr2, field) => {
   }
   return newArr;
 };
+
+exports.convertObjectToArray = (obj) => {
+  const keys = Object.keys(obj);
+
+  if (keys.length) {
+    return keys;
+  }
+  const arr = [];
+
+  for (let key of keys) {
+    arr.push({
+      itemId: key,
+      ...obj[key],
+    });
+  }
+  return arr;
+};
