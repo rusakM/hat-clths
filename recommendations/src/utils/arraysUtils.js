@@ -29,7 +29,7 @@ exports.getArraysSimilarities = (arr1, arr2, field) => {
 exports.convertObjectToArray = (obj) => {
   const keys = Object.keys(obj);
 
-  if (keys.length) {
+  if (!keys.length) {
     return keys;
   }
   const arr = [];
@@ -41,4 +41,26 @@ exports.convertObjectToArray = (obj) => {
     });
   }
   return arr;
+};
+
+exports.convertArrayToObject = (arr, idField = "itemId") => {
+  const obj = {};
+
+  for (let item of arr) {
+    const id = item[idField];
+    obj[id] = item;
+  }
+
+  return obj;
+};
+
+exports.convertSetToObject = (arr, idField = "id") => {
+  const obj = {};
+  for (let item of arr) {
+    obj[item] = {
+      [idField]: item,
+    };
+  }
+
+  return obj;
 };

@@ -4209,3 +4209,50 @@ const filteredBoughts = boughts.filter(
 console.log(filteredBoughts.length);
 // console.log(isObjArraysSimilarity([{ m: 1 }, { m: 2 }], [{ m: 1 }], "m"));
 // console.log(isObjArraysSimilarity([{ m: 1 }, { m: 2 }], [{ m: 0 }], "m"));
+
+const convertObjectToArray = (obj) => {
+  const keys = Object.keys(obj);
+  console.log(keys);
+  if (!keys.length) {
+    return keys;
+  }
+  const arr = [];
+
+  for (let key of keys) {
+    const item = {
+      itemId: key,
+      ...obj[key],
+    };
+    arr.push(item);
+  }
+  return arr;
+};
+
+console.log(convertObjectToArray({ m: "1", n: 2 }));
+
+const productsExclusion = [
+  "62e27de0aac312f4c0f4dd49",
+  "62e2eb93aac312f4c0f4e1e1",
+  "62e126831c08abdb4542bfb0",
+  "62e2e3a6aac312f4c0f4dfcb",
+  "62e2edfdaac312f4c0f4e27c",
+  "62e2e93baac312f4c0f4e11f",
+  "62e2f483aac312f4c0f4e3ec",
+  "62e2f1d9aac312f4c0f4e35c",
+  "62e2ef7eaac312f4c0f4e2bf",
+  "62e3be4eaac312f4c0f4e790",
+];
+
+const convertSetToObject = (arr, idField = "id") => {
+  const obj = {};
+
+  for (let item of arr) {
+    obj[item] = {
+      [idField]: item,
+    };
+  }
+
+  return obj;
+};
+
+console.log(convertSetToObject(productsExclusion));

@@ -7,6 +7,7 @@ const list = {
   IDENTICAL_CATEGORY: 1.5,
   CATEGORIES_SIMILARITY: 0.3,
   USER_SIMILARITY: 2,
+  ACTION: 0.1,
 };
 
 module.exports = list;

@@ -1,5 +1,6 @@
 const arraysUtils = require("./arraysUtils");
 const factorsList = require("./factorsList");
+const uniqueSet = require("./uniqueSet").createSet;
 
 exports.createBoughtsMatrix = (usersSet, productsSet, boughts) => {
   const matrix = {};
@@ -127,6 +128,8 @@ exports.createProductsDetailsList = (
       showsRank: 0,
       usersList: [],
       topSimilarProducts: [],
+      ranksAverage: 0,
+      rank: 0,
     };
     productsList[product] = productData;
   }
@@ -161,6 +164,16 @@ exports.createProductsDetailsList = (
   );
   productsList = this.calculateRank(productsList, "showsRank", "productShows");
 
+  for (let product in productsList) {
+    const p = productsList[product];
+
+    productsList[product].ranksAverage =
+      (p.showsRank * factorsList.SHOW + p.boughtsRank * factorsList.BOUGHT) /
+      (factorsList.BOUGHT + factorsList.SHOW);
+  }
+
+  productsList = this.calculateRank(productsList, "rank", "ranksAverage", true);
+
   const usersPreferences = this.calculateUsersPreferences(
     usersSet,
     shows,
@@ -194,6 +207,8 @@ exports.createCategoriesRank = (categories, boughts, shows) => {
       boughts: 0,
       showsRank: 0,
       shows: 0,
+      ranksAverage: 0,
+      rank: 0,
     };
   }
 
@@ -211,6 +226,15 @@ exports.createCategoriesRank = (categories, boughts, shows) => {
 
   dataset = this.calculateRank(dataset, "boughtsRank", "boughts");
   dataset = this.calculateRank(dataset, "showsRank", "shows");
+
+  for (let category of categories) {
+    const cat = dataset[category._id];
+    dataset[category._id].ranksAverage =
+      (cat.boughtsRank * factorsList.BOUGHT +
+        cat.showsRank * factorsList.SHOW) /
+      (factorsList.BOUGHT + factorsList.SHOW);
+  }
+  dataset = this.calculateRank(dataset, "rank", "ranksAverage");
 
   return dataset;
 };
@@ -304,7 +328,7 @@ const calculateGenderFactor = (userScore, userPref, itemGender) => {
   return userScore + add;
 };
 
-exports.calculateTopSimilarProducts = (dataset, usersPreferences) => {
+exports.calculateTopSimilarProducts = (dataset) => {
   for (let item in dataset) {
     const arr1 = dataset[item].usersList;
     let similarProducts = [];
@@ -459,6 +483,7 @@ exports.calculateUsersPreferences = (
 
 exports.calculateUserRecommendations = (
   usersSet,
+  productsSet,
   usersSimilaritiesList,
   categoriesMatrix,
   productsDataset,
@@ -468,6 +493,7 @@ exports.calculateUserRecommendations = (
 ) => {
   //prepare users similarities
   const usersRecommendations = {};
+  const INITIAL_PRODUCTS_SCORES = this.createProductsScores(productsSet);
 
   for (let user of usersSet) {
     usersRecommendations[user] = {
@@ -477,11 +503,14 @@ exports.calculateUserRecommendations = (
       topCategories: [],
       topProducts: [],
       topSimilarUsers: [],
+      userProductsScores: {},
+      productsExclusion: [],
     };
 
     for (let user2 of Object.keys(usersSimilaritiesList)) {
       if (usersSimilaritiesList[user][user2] > 0) {
         usersRecommendations[user].topSimilarUsers.push({
+          itemId: user2,
           score: usersSimilaritiesList[user][user2],
         });
       }
@@ -491,16 +520,22 @@ exports.calculateUserRecommendations = (
       (a, b) => b.score - a.score
     );
 
+    usersRecommendations[user].topSimilarUsers =
+      arraysUtils.convertArrayToObject(
+        usersRecommendations[user].topSimilarUsers
+      );
+
     const userCategoryShows = categoriesShows.filter(
       (item) => item.user === user
     );
     const userCategories = {};
 
     for (let categoryShow of userCategoryShows) {
-      if (userCategories[categoryShow]) {
-        userCategories[categoryShow].score++;
+      const { category } = categoryShow;
+      if (userCategories[category]) {
+        userCategories[category].score++;
       } else {
-        userCategories[categoryShow] = {
+        userCategories[category] = {
           score: 1,
         };
       }
@@ -508,6 +543,94 @@ exports.calculateUserRecommendations = (
 
     usersRecommendations[user].topCategories =
       arraysUtils.convertObjectToArray(userCategories);
+
+    usersRecommendations[user].topCategories.sort((a, b) => b.score - a.score);
+
+    usersRecommendations[user].userActions = getUserActionsSet(
+      user,
+      shows,
+      boughts,
+      categoriesShows
+    );
+
+    usersRecommendations[user].userActions.products =
+      arraysUtils.convertArrayToObject(
+        usersRecommendations[user].userActions.products
+      );
+    usersRecommendations[user].userActions.categories =
+      arraysUtils.convertArrayToObject(
+        usersRecommendations[user].userActions.categories
+      );
+
+    usersRecommendations[user].productsExclusion = uniqueSet(
+      boughts
+        .filter((item) => item.user._id === user)
+        .map((item) => item.productPreview._id)
+    );
+
+    usersRecommendations[user].userProductsScores = {
+      ...INITIAL_PRODUCTS_SCORES,
+    };
+  }
+
+  for (let user1 of usersSet) {
+    const recommendationsMegaList =
+      usersRecommendations[user1].userActions.products;
+    const userExclusions = usersRecommendations[user1].productsExclusion;
+    for (let user2 of usersSet) {
+      if (user1 === user2) {
+        continue;
+      }
+      const actions = usersRecommendations[user2].userActions.products;
+      const similarUser = usersRecommendations[user1].topSimilarUsers[user2];
+      const userSimilarity =
+        similarUser && similarUser.score ? similarUser.score : 0;
+
+      for (let product in actions) {
+        if (!recommendationsMegaList[product]) {
+          recommendationsMegaList[product] = actions[product];
+          let score = actions[product].score;
+          score *=
+            userSimilarity +
+            calculateProductFactor(
+              product,
+              productsDataset,
+              usersRecommendations[user1].topCategories,
+              usersRecommendations[user1].userActions
+            );
+          score = calculateGenderSimilarity(
+            user1,
+            product,
+            score,
+            productsDataset
+          );
+          recommendationsMegaList[product].score = score;
+        } else {
+          recommendationsMegaList[product].score +=
+            actions[product].score * userSimilarity;
+          recommendationsMegaList[product].score += calculateProductFactor(
+            product,
+            productsDataset,
+            usersRecommendations[user1].topCategories,
+            usersRecommendations[user1].userActions
+          );
+          recommendationsMegaList[product].score = calculateGenderSimilarity(
+            user1,
+            product,
+            recommendationsMegaList[product].score,
+            productsDataset
+          );
+        }
+      }
+    }
+
+    for (let recommendation in recommendationsMegaList) {
+      if (userExclusions.find((item) => item === recommendation)) {
+        delete recommendationsMegaList[recommendation];
+      }
+    }
+
+    usersRecommendations[user1].userProductsScores = recommendationsMegaList;
   }
 
   return usersRecommendations;
@@ -519,11 +642,11 @@ const getUserActionsSet = (userId, shows, boughts, categoriesShows) => {
     categories: {},
   };
 
-  const userBoughts = boughts.filter((item) => item.user.id === user);
-  const userShows = shows.filter((item) => item.user === user);
+  const userBoughts = boughts.filter((item) => item.user.id === userId);
+  const userShows = shows.filter((item) => item.user === userId);
 
   const userCategoryShows = categoriesShows.filter(
-    (item) => item.user === user
+    (item) => item.user === userId
   );
 
   for (let bought of userBoughts) {
@@ -554,12 +677,11 @@ const getUserActionsSet = (userId, shows, boughts, categoriesShows) => {
   }
 
   for (let categoryShow of userCategoryShows) {
-    const { productPreview } = categoryShow;
-
-    if (userActions.categories[productPreview]) {
-      userActions.categories[productPreview].score++;
+    const category = `${categoryShow.category}`;
+    if (userActions.categories[category]) {
+      userActions.categories[category].score++;
     } else {
-      userActions.categories[productPreview] = { score: 1 };
+      userActions.categories[category] = { score: 1 };
     }
   }
 
@@ -568,10 +690,56 @@ const getUserActionsSet = (userId, shows, boughts, categoriesShows) => {
     .map((item) => ({
       ...item,
       score: item.score / multiplier,
-    }));
-  userActions.categories = arraysUtils.convertObjectToArray(
-    userActions.categories
-  );
-
+    }))
+    .sort((a, b) => b.score - a.score);
+  userActions.categories = arraysUtils
+    .convertObjectToArray(userActions.categories)
+    .sort((a, b) => b.score - a.score);
   return userActions;
+};
+
+exports.createProductsScores = (productsSet) => {
+  const obj = {};
+
+  for (let product of productsSet) {
+    obj[product] = {
+      total: 0,
+      sumSimilarity: 0,
+      score: 0,
+    };
+  }
+
+  return obj;
+};
+
+const calculateProductFactor = (
+  product,
+  productsList,
+  userCategoriesRank,
+  userActions
+) => {
+  const productData = productsList.productsList[product];
+  const category = productData.category.id;
+  let score = 0;
+
+  score += (1 / productData.ranksAverage) * factorsList.USER_SIMILARITY;
+
+  if (userCategoriesRank[category]) {
+    score +=
+      (userCategoriesRank[category].score / 100) *
+      factorsList.CATEGORIES_SIMILARITY;
+  }
+
+  if (userActions.products[product]) {
+    score += userActions.products[product].score * factorsList.ACTION;
+  }
+
+  return score;
+};
+
+const calculateGenderSimilarity = (user, product, score, productsList) => {
+  const productScore = productsList.productsList[product].gender ? 1 : -1;
+  const userScore = productsList.usersPreferences[user];
+
+  return score * (productScore / userScore);
 };
