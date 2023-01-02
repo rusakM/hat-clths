@@ -116,11 +116,12 @@ exports.makeRecommendations = async () => {
 
   console.log("calc time: ", Date.now() - arrays.time, "ms");
   return {
-    // usersMatrix,
+    usersMatrix,
     usersRecommendations,
     productDetailsList,
-    // categoriesDetailsList,
-    // boughtsMatrix,
+    categoriesDetailsList,
+    boughtsMatrix,
+    categoriesMatrix,
   };
 };
 

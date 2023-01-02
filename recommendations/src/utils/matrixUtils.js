@@ -562,6 +562,9 @@ exports.calculateUserRecommendations = (
         usersRecommendations[user].userActions.categories
       );
 
+    // if (user === "62bdec9ff3a1d9456ddf83ce") {
+    //   console.log(usersRecommendations[user].userActions);
+    // }
     usersRecommendations[user].productsExclusion = uniqueSet(
       boughts
         .filter((item) => item.user._id === user)
@@ -574,21 +577,24 @@ exports.calculateUserRecommendations = (
   }
 
   for (let user1 of usersSet) {
-    const recommendationsMegaList =
-      usersRecommendations[user1].userActions.products;
-    const userExclusions = usersRecommendations[user1].productsExclusion;
+    const recommendationsMegaList = {
+      ...usersRecommendations[user1].userActions.products,
+    };
+
+    const userExclusions = [...usersRecommendations[user1].productsExclusion];
+
     for (let user2 of usersSet) {
       if (user1 === user2) {
         continue;
       }
-      const actions = usersRecommendations[user2].userActions.products;
+      const actions = { ...usersRecommendations[user2].userActions.products };
       const similarUser = usersRecommendations[user1].topSimilarUsers[user2];
       const userSimilarity =
         similarUser && similarUser.score ? similarUser.score : 0;
 
       for (let product in actions) {
         if (!recommendationsMegaList[product]) {
-          recommendationsMegaList[product] = actions[product];
+          recommendationsMegaList[product] = { ...actions[product] };
           let score = actions[product].score;
           score *=
             userSimilarity +
@@ -692,9 +698,11 @@ const getUserActionsSet = (userId, shows, boughts, categoriesShows) => {
       score: item.score / multiplier,
     }))
     .sort((a, b) => b.score - a.score);
+
   userActions.categories = arraysUtils
     .convertObjectToArray(userActions.categories)
     .sort((a, b) => b.score - a.score);
+
   return userActions;
 };
 
