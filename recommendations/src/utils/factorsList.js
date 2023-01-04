@@ -8,6 +8,8 @@ const list = {
   CATEGORIES_SIMILARITY: 0.3,
   USER_SIMILARITY: 2,
   ACTION: 0.1,
+  TOP_PRODUCTS_COUNT: 10,
+  USER_PRODUCTS_COUNT: 20,
 };
 
 module.exports = list;

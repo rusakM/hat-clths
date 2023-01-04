@@ -114,6 +114,13 @@ exports.makeRecommendations = async () => {
     arrays.categoryShows
   );
 
+  // modelling product recommendations
+  const productRecommendations =
+    matrixUtils.prepareProductRecommendations(productDetailsList);
+
+  // modelling user products recommedations
+  matrixUtils.prepareUserProductRecommendations(usersRecommendations);
+
   console.log("calc time: ", Date.now() - arrays.time, "ms");
   return {
     usersMatrix,
@@ -122,6 +129,7 @@ exports.makeRecommendations = async () => {
     categoriesDetailsList,
     boughtsMatrix,
     categoriesMatrix,
+    productRecommendations,
   };
 };
 

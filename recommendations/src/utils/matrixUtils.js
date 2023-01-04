@@ -633,6 +633,18 @@ exports.calculateUserRecommendations = (
     for (let recommendation in recommendationsMegaList) {
       if (userExclusions.find((item) => item === recommendation)) {
         delete recommendationsMegaList[recommendation];
+        continue;
+      }
+      if (
+        recommendationsMegaList[recommendation].score === Infinity ||
+        recommendationsMegaList[recommendation].score === -Infinity
+      ) {
+        delete recommendationsMegaList[recommendation];
+        continue;
+      }
+      if (recommendationsMegaList[recommendation].score <= 0) {
+        delete recommendationsMegaList[recommendation];
+        continue;
       }
     }
 
@@ -750,4 +762,52 @@ const calculateGenderSimilarity = (user, product, score, productsList) => {
   const userScore = productsList.usersPreferences[user];
 
   return score * (productScore / userScore);
+};
+
+exports.prepareProductRecommendations = (productsDataset) => {
+  const productsRecommendationsList = [];
+  const date = Date.now();
+
+  for (let product in productsDataset.productsList) {
+    const p = productsDataset.productsList[product];
+
+    if (p.topSimilarProducts) {
+      let topProductsCount = factorsList.TOP_PRODUCTS_COUNT;
+      if (p.topSimilarProducts.length < topProductsCount) {
+        topProductsCount = p.topSimilarProducts.length;
+      }
+
+      for (let i = 0; i < topProductsCount; i++) {
+        productsRecommendationsList.push({
+          productPreview: product,
+          similarProduct: p.topSimilarProducts[i].product,
+          similarity: p.topSimilarProducts[i].score,
+          createdAt: date,
+        });
+      }
+    }
+  }
+
+  console.log(productsRecommendationsList.length);
+  return productsRecommendationsList;
+};
+
+exports.prepareUserProductRecommendations = (usersRecommendations) => {
+  const productRecommendationsList = [];
+
+  for (let user in usersRecommendations) {
+    let recommendedProducts = usersRecommendations[user].userProductsScores;
+    const keys = Object.keys(recommendedProducts);
+    let otherProducts = 0;
+    if (keys.length > 0) {
+      if (keys.length < factorsList.USER_PRODUCTS_COUNT) {
+        otherProducts = factorsList.USER_PRODUCTS_COUNT - keys.length;
+      }
+      recommendedProducts =
+        arraysUtils.convertObjectToArray(recommendedProducts);
+      recommendedProducts = recommendedProducts.sort(
+        (a, b) => b.score - a.score
+      );
+    }
+  }
 };
