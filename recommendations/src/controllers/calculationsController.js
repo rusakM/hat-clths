@@ -118,18 +118,35 @@ exports.makeRecommendations = async () => {
   const productRecommendations =
     matrixUtils.prepareProductRecommendations(productDetailsList);
 
+  // modelling products rank
+
+  const productsRank = matrixUtils.prepareProductsRank(productDetailsList);
+
+  // modeling gender based top products
+
+  const genderTopProducts = matrixUtils.prepareGenderTopProducts(productsRank);
+
   // modelling user products recommedations
-  matrixUtils.prepareUserProductRecommendations(usersRecommendations);
+  const userBasedRecommendations =
+    matrixUtils.prepareUserProductRecommendations(
+      usersRecommendations,
+      productsRank,
+      genderTopProducts,
+      productDetailsList.usersPreferences
+    );
 
   console.log("calc time: ", Date.now() - arrays.time, "ms");
   return {
-    usersMatrix,
-    usersRecommendations,
-    productDetailsList,
-    categoriesDetailsList,
-    boughtsMatrix,
-    categoriesMatrix,
+    // usersMatrix,
+    // usersRecommendations,
+    // productDetailsList,
+    // categoriesDetailsList,
+    // boughtsMatrix,
+    // categoriesMatrix,
     productRecommendations,
+    productsRank,
+    genderTopProducts,
+    userBasedRecommendations,
   };
 };
 

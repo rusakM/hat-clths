@@ -562,9 +562,6 @@ exports.calculateUserRecommendations = (
         usersRecommendations[user].userActions.categories
       );
 
-    // if (user === "62bdec9ff3a1d9456ddf83ce") {
-    //   console.log(usersRecommendations[user].userActions);
-    // }
     usersRecommendations[user].productsExclusion = uniqueSet(
       boughts
         .filter((item) => item.user._id === user)
@@ -788,12 +785,65 @@ exports.prepareProductRecommendations = (productsDataset) => {
     }
   }
 
-  console.log(productsRecommendationsList.length);
   return productsRecommendationsList;
 };
 
-exports.prepareUserProductRecommendations = (usersRecommendations) => {
+exports.prepareProductsRank = (productsDataset) => {
+  const createdAt = Date.now();
+  const sortedProducts = arraysUtils
+    .convertObjectToArray(productsDataset.productsList)
+    .map(({ id, ranksAverage, gender }) => ({
+      productPreview: id,
+      ranksAverage,
+      gender,
+      createdAt,
+    }))
+    .sort((a, b) => a.ranksAverage - b.ranksAverage);
+
+  return sortedProducts;
+};
+
+exports.prepareGenderTopProducts = (productsRank) => {
+  const maleProducts = [];
+  const femaleProducts = [];
+  let i = 0;
+
+  while (maleProducts.length < 20 || femaleProducts.length < 20) {
+    if (i === productsRank.length) {
+      break;
+    }
+    if (productsRank[i].gender) {
+      if (maleProducts.length === 20) {
+        i++;
+        continue;
+      }
+      maleProducts.push(productsRank[i]);
+    } else {
+      if (femaleProducts.length === 20) {
+        i++;
+        continue;
+      }
+      femaleProducts.push(productsRank[i]);
+    }
+    i++;
+  }
+  return [...maleProducts, ...femaleProducts];
+};
+
+exports.prepareUserProductRecommendations = (
+  usersRecommendations,
+  productsRank,
+  genderBasedRecommendations,
+  usersGenderPreferences
+) => {
   const productRecommendationsList = [];
+  const createdAt = Date.now();
+  const maleProducts = genderBasedRecommendations.filter(
+    (item) => item.gender === true
+  );
+  const femaleProducts = genderBasedRecommendations.filter(
+    (item) => item.gender === false
+  );
 
   for (let user in usersRecommendations) {
     let recommendedProducts = usersRecommendations[user].userProductsScores;
@@ -803,11 +853,70 @@ exports.prepareUserProductRecommendations = (usersRecommendations) => {
       if (keys.length < factorsList.USER_PRODUCTS_COUNT) {
         otherProducts = factorsList.USER_PRODUCTS_COUNT - keys.length;
       }
-      recommendedProducts =
-        arraysUtils.convertObjectToArray(recommendedProducts);
-      recommendedProducts = recommendedProducts.sort(
-        (a, b) => b.score - a.score
-      );
+      recommendedProducts = arraysUtils
+        .convertObjectToArray(recommendedProducts)
+        .map((item) => ({
+          productPreview: item.itemId,
+          score: item.score,
+          user,
+          createdAt,
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      if (recommendedProducts.length > 20) {
+        for (let i = 0; i < 20; i++) {
+          productRecommendationsList.push(recommendedProducts[i]);
+        }
+        continue;
+      } else {
+        for (let i = 0; i < recommendedProducts.length; i++) {
+          productRecommendationsList.push(recommendedProducts[i]);
+        }
+        // select top products by gender
+        if (usersGenderPreferences[user] !== 0) {
+          let j = otherProducts;
+          let k = 0;
+          const gender = usersGenderPreferences[user] > 0 ? true : false;
+          while (j > 0) {
+            if (gender) {
+              productRecommendationsList.push({
+                productPreview: maleProducts[k].productPreview,
+                score: maleProducts[0].ranksAverage,
+                user,
+                createdAt,
+              });
+            } else {
+              productRecommendationsList.push({
+                productPreview: maleProducts[k].productPreview,
+                score: maleProducts[0].ranksAverage,
+                user,
+                createdAt,
+              });
+            }
+            j--;
+            k++;
+          }
+        } else {
+          for (let i = 0; i < otherProducts; i++) {
+            productRecommendationsList.push({
+              productPreview: productsRank[i].productPreview,
+              score: productsRank[i].ranksAverage,
+              user,
+              createdAt,
+            });
+          }
+        }
+      }
+    } else {
+      for (let i = 0; i < 20; i++) {
+        productRecommendationsList.push({
+          productPreview: productsRank[i].productPreview,
+          score: productsRank[i].ranksAverage,
+          user,
+          createdAt,
+        });
+      }
     }
   }
+  return productRecommendationsList;
 };
