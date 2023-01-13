@@ -643,6 +643,8 @@ exports.calculateUserRecommendations = (
         delete recommendationsMegaList[recommendation];
         continue;
       }
+      recommendationsMegaList[recommendation].category =
+        productsDataset.productsList[recommendation].category.id;
     }
 
     usersRecommendations[user1].userProductsScores = recommendationsMegaList;
@@ -778,7 +780,11 @@ exports.prepareProductRecommendations = (productsDataset) => {
         productsRecommendationsList.push({
           productPreview: product,
           similarProduct: p.topSimilarProducts[i].product,
-          similarity: p.topSimilarProducts[i].score,
+          predictionScore: p.topSimilarProducts[i].score,
+          category: p.category.id,
+          similarProductCategory:
+            productsDataset.productsList[p.topSimilarProducts[i].product]
+              .category.id,
           createdAt: date,
         });
       }
@@ -792,11 +798,12 @@ exports.prepareProductsRank = (productsDataset) => {
   const createdAt = Date.now();
   const sortedProducts = arraysUtils
     .convertObjectToArray(productsDataset.productsList)
-    .map(({ id, ranksAverage, gender }) => ({
+    .map(({ id, ranksAverage, gender, category }) => ({
       productPreview: id,
       ranksAverage,
       gender,
       createdAt,
+      category: category.id,
     }))
     .sort((a, b) => a.ranksAverage - b.ranksAverage);
 
@@ -857,11 +864,12 @@ exports.prepareUserProductRecommendations = (
         .convertObjectToArray(recommendedProducts)
         .map((item) => ({
           productPreview: item.itemId,
-          score: item.score,
+          predictionScore: item.score,
+          category: item.category,
           user,
           createdAt,
         }))
-        .sort((a, b) => b.score - a.score);
+        .sort((a, b) => b.predictionScore - a.predictionScore);
 
       if (recommendedProducts.length > 20) {
         for (let i = 0; i < 20; i++) {
@@ -881,14 +889,16 @@ exports.prepareUserProductRecommendations = (
             if (gender) {
               productRecommendationsList.push({
                 productPreview: maleProducts[k].productPreview,
-                score: maleProducts[0].ranksAverage,
+                predictionScore: maleProducts[0].ranksAverage,
+                category: maleProducts[k].category,
                 user,
                 createdAt,
               });
             } else {
               productRecommendationsList.push({
-                productPreview: maleProducts[k].productPreview,
-                score: maleProducts[0].ranksAverage,
+                productPreview: femaleProducts[k].productPreview,
+                predictionScore: femaleProducts[0].ranksAverage,
+                category: femaleProducts[k].category,
                 user,
                 createdAt,
               });
@@ -900,7 +910,8 @@ exports.prepareUserProductRecommendations = (
           for (let i = 0; i < otherProducts; i++) {
             productRecommendationsList.push({
               productPreview: productsRank[i].productPreview,
-              score: productsRank[i].ranksAverage,
+              predictionScore: productsRank[i].ranksAverage,
+              category: productsRank[i].category,
               user,
               createdAt,
             });
@@ -911,7 +922,8 @@ exports.prepareUserProductRecommendations = (
       for (let i = 0; i < 20; i++) {
         productRecommendationsList.push({
           productPreview: productsRank[i].productPreview,
-          score: productsRank[i].ranksAverage,
+          predictionScore: productsRank[i].ranksAverage,
+          category: productsRank[i].category,
           user,
           createdAt,
         });

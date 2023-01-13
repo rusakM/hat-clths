@@ -96,11 +96,11 @@ exports.makeRecommendations = async () => {
 
   // calculate categories rank
 
-  const categoriesDetailsList = matrixUtils.createCategoriesRank(
-    arrays.categories,
-    arrays.boughts,
-    arrays.categoryShows
-  );
+  // const categoriesDetailsList = matrixUtils.createCategoriesRank(
+  //   arrays.categories,
+  //   arrays.boughts,
+  //   arrays.categoryShows
+  // );
 
   // calculate user recommendations
   const usersRecommendations = matrixUtils.calculateUserRecommendations(
@@ -136,6 +136,22 @@ exports.makeRecommendations = async () => {
     );
 
   console.log("calc time: ", Date.now() - arrays.time, "ms");
+
+  // send recommendations to api
+  // try {
+  //   await superagent
+  //     .post(`${process.env.API}/api/recommendations`)
+  //     .send({
+  //       productRecommendations,
+  //       productsRank,
+  //       genderTopProducts,
+  //       userBasedRecommendations,
+  //     })
+  //     .set("Authorization", `Bearer ${arrays.token}`);
+  // } catch (error) {
+  //   throw "Recommendations send error";
+  // }
+
   return {
     // usersMatrix,
     // usersRecommendations,
@@ -156,12 +172,6 @@ const fetchArrays = async () => {
     if (!token) {
       throw "No token";
     }
-    const options = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      method: "GET",
-    };
 
     const users = await superagent
       .get(`${process.env.API}/api/users?limit=999999`)
@@ -194,6 +204,7 @@ const fetchArrays = async () => {
       categories: categories._body.data.data,
       productShows: productShows._body.data.data,
       categoryShows: categoryShows._body.data.data,
+      token,
       time: Date.now(),
     };
   } catch (error) {

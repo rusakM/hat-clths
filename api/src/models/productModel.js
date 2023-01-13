@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema(
     },
     productPreview: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "ProductPreview",
     },
     price: Number,
     category: {
