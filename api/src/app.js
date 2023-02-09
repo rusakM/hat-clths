@@ -17,6 +17,7 @@ const productPreviewRouter = require("./routes/productPreviewRouter");
 const bookingRouter = require("./routes/bookingRouter");
 const emailTestRouter = require("./routes/emailTestRouter");
 const newsletterRouter = require("./routes/newsletterRouter");
+const recommendationsRouter = require("./routes/recommendationsRouter");
 
 const app = express();
 
@@ -100,6 +101,7 @@ app.use("/api/products", productPreviewRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/email-test", emailTestRouter);
 app.use("/api/newsletter", newsletterRouter);
+app.use("/api/recommendations", recommendationsRouter);
 app.use(errorHandler);
 
 module.exports = app;

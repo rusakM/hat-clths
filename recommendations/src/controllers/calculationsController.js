@@ -8,6 +8,8 @@ const factorsList = require("../utils/factorsList");
 exports.recommendations = catchAsync(async (req, res, next) => {
   const recommendations = await this.makeRecommendations();
 
+  await this.sendRecommendations(recommendations, recommendations.token);
+
   res.status(200).json({
     data: {
       recommendations,
@@ -135,34 +137,14 @@ exports.makeRecommendations = async () => {
       productDetailsList.usersPreferences
     );
 
-  console.log("calc time: ", Date.now() - arrays.time, "ms");
-
-  // send recommendations to api
-  // try {
-  //   await superagent
-  //     .post(`${process.env.API}/api/recommendations`)
-  //     .send({
-  //       productRecommendations,
-  //       productsRank,
-  //       genderTopProducts,
-  //       userBasedRecommendations,
-  //     })
-  //     .set("Authorization", `Bearer ${arrays.token}`);
-  // } catch (error) {
-  //   throw "Recommendations send error";
-  // }
+  console.log("calculations time: ", Date.now() - arrays.time, "ms");
 
   return {
-    // usersMatrix,
-    // usersRecommendations,
-    // productDetailsList,
-    // categoriesDetailsList,
-    // boughtsMatrix,
-    // categoriesMatrix,
     productRecommendations,
     productsRank,
     genderTopProducts,
     userBasedRecommendations,
+    token: arrays.token,
   };
 };
 
@@ -210,5 +192,32 @@ const fetchArrays = async () => {
   } catch (error) {
     console.log(error);
     return null;
+  }
+};
+
+exports.sendRecommendations = async (data, token) => {
+  const { productRecommendations, userBasedRecommendations, productsRank } =
+    data;
+  // send recommendations to api
+  try {
+    //send product recommendations
+    await superagent
+      .post(`${process.env.API}/api/recommendations/cold`)
+      .send({ recommendations: productRecommendations })
+      .set("Authorization", `Bearer ${token}`);
+
+    //send dedicated product recommendations
+    await superagent
+      .post(`${process.env.API}/api/recommendations/dedicated`)
+      .send({ recommendations: userBasedRecommendations })
+      .set("Authorization", `Bearer ${token}`);
+
+    //send product rank
+    await superagent
+      .post(`${process.env.API}/api/recommendations/rank`)
+      .send({ recommendations: productsRank })
+      .set("Authorization", `Bearer ${token}`);
+  } catch (error) {
+    throw "Recommendations send error";
   }
 };

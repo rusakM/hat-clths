@@ -13,4 +13,10 @@ router.get(
 
 router.get("/recommendations", calculationsController.recommendations);
 
+router.get(
+  "/recommendationsPerform",
+  taskController.addImmediateTask(onDemandJobs.callRecommendations),
+  taskController.sendSuccessResponse
+);
+
 module.exports = router;

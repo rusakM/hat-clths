@@ -18,6 +18,8 @@ const server = app.listen(port, () => {
 global.immediateTasks = new Queue();
 runners.immediateTasksRunner.running();
 
+runners.dailyRecommendations.running();
+
 process.on("unhandledRejection", (err) => {
   console.log("Unhandled rejection. Shutting down...");
   server.close(() => {

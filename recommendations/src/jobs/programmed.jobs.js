@@ -1,5 +1,3 @@
-const catchAsync = require("../utils/catchAsync");
-
 exports.immediateTasks = async () => {
   while (global.immediateTasks.count > 0) {
     try {
