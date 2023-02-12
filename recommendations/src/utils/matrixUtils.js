@@ -932,3 +932,19 @@ exports.prepareUserProductRecommendations = (
   }
   return productRecommendationsList;
 };
+
+exports.prepareUserPreferencesList = (usersPreferences) => {
+  let usersArray = [];
+  const createdAt = Date.now();
+
+  for (let user in usersPreferences) {
+    usersArray.push({
+      user,
+      score: usersPreferences[user],
+      gender: usersPreferences[user] > 0 ? true : false,
+      createdAt,
+    });
+  }
+
+  return usersArray;
+};

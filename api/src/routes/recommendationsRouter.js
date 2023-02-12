@@ -2,6 +2,8 @@ const express = require("express");
 const dedicatedPredictionProductController = require("../controllers/dedicatedPredictionProductController");
 const coldPredictionProductController = require("../controllers/coldPredictionProductController");
 const productRankController = require("../controllers/productsRankController");
+const genderBasedRecommendationController = require("../controllers/genderBasedRecommendationController");
+const userRecomendationsProfileController = require("../controllers/userRecommendationsProfileController");
 const authController = require("../controllers/authController");
 
 const router = express.Router();
@@ -19,7 +21,11 @@ router
     coldPredictionProductController.create
   );
 
-router.get("/cold/:id", coldPredictionProductController.getSimilar);
+router.get(
+  "/cold/:id",
+  coldPredictionProductController.getSimilar,
+  coldPredictionProductController.getAll
+);
 router.get("/rank", productRankController.getAll);
 router.get(
   "/rank/top20",
@@ -27,12 +33,27 @@ router.get(
   productRankController.getAll
 );
 
+router.get(
+  "/male",
+  genderBasedRecommendationController.getTopProducts("male"),
+  genderBasedRecommendationController.getAll
+);
+
+router.get(
+  "/female",
+  genderBasedRecommendationController.getTopProducts("female"),
+  genderBasedRecommendationController.getAll
+);
+
 router.use(authController.protect);
 
 router.get("/dedicated", dedicatedPredictionProductController.getAll);
+router.get("/user-profile", userRecomendationsProfileController.getOne);
 
 router.use(authController.restrictTo("admin"));
 router.post("/rank", productRankController.create);
 router.post("/dedicated", dedicatedPredictionProductController.create);
+router.post("/gender", genderBasedRecommendationController.create);
+router.post("/user-profile", userRecomendationsProfileController.create);
 
 module.exports = router;

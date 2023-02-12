@@ -81,6 +81,12 @@ userSchema.virtual("coupons", {
   match: { isUsed: false },
 });
 
+userSchema.virtual("recommendationsProfile", {
+  ref: "UserRecommendationsProfile",
+  foreignField: "user",
+  localField: "_id",
+});
+
 // this method will run before saving document in dbs
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
@@ -112,6 +118,11 @@ userSchema.pre(/^find/, function (next) {
     .populate({
       path: "coupons",
       select: "coupon createdAt expires isUsed",
+      options: { _recursed: true },
+    })
+    .populate({
+      path: "recommendationsProfile",
+      select: "-__v -createdAt",
       options: { _recursed: true },
     });
 

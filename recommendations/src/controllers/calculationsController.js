@@ -137,6 +137,11 @@ exports.makeRecommendations = async () => {
       productDetailsList.usersPreferences
     );
 
+  // modelling user preferences list
+  const usersPreferences = matrixUtils.prepareUserPreferencesList(
+    productDetailsList.usersPreferences
+  );
+
   console.log("calculations time: ", Date.now() - arrays.time, "ms");
 
   return {
@@ -145,6 +150,7 @@ exports.makeRecommendations = async () => {
     genderTopProducts,
     userBasedRecommendations,
     token: arrays.token,
+    usersPreferences,
   };
 };
 
@@ -196,8 +202,13 @@ const fetchArrays = async () => {
 };
 
 exports.sendRecommendations = async (data, token) => {
-  const { productRecommendations, userBasedRecommendations, productsRank } =
-    data;
+  const {
+    productRecommendations,
+    userBasedRecommendations,
+    productsRank,
+    genderTopProducts,
+    usersPreferences,
+  } = data;
   // send recommendations to api
   try {
     //send product recommendations
@@ -216,6 +227,18 @@ exports.sendRecommendations = async (data, token) => {
     await superagent
       .post(`${process.env.API}/api/recommendations/rank`)
       .send({ recommendations: productsRank })
+      .set("Authorization", `Bearer ${token}`);
+
+    //send gender recommendations
+    await superagent
+      .post(`${process.env.API}/api/recommendations/gender`)
+      .send({ recommendations: genderTopProducts })
+      .set("Authorization", `Bearer ${token}`);
+
+    // send users recommendations profiles
+    await superagent
+      .post(`${process.env.API}/api/recommendations/user-profile`)
+      .send({ recommendations: usersPreferences })
       .set("Authorization", `Bearer ${token}`);
   } catch (error) {
     throw "Recommendations send error";
