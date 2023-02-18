@@ -5,7 +5,7 @@ const GenderBasedRecommendation = require("../models/genderBasedRecommendationMo
 
 exports.getTopProducts = (gender /** male|female */) => {
   return (req, res, next) => {
-    req.query.limit = 20;
+    req.query.limit = 10;
     req.query.gender = gender === "male" ? 1 : 0;
     req.query.sort = "ranksAverage";
 

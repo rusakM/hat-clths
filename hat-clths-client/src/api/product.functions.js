@@ -22,9 +22,13 @@ export const getProduct = async (productId) => {
 
 export const getTopProducts = async (limit) => {
   try {
-    const products = await getData(
-      `/api/products/new${limit && `?limit=${limit}`}`
+    let products = await getData(
+      `/api/recommendations${limit && `?limit=${limit}`}`
     );
+
+    if (products.length > 0) {
+      products = products.map((item) => item.productPreview);
+    }
 
     return products;
   } catch (error) {

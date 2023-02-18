@@ -11,6 +11,7 @@ import addressReducer from "./address/address.reducer";
 import bookingReducer from "./booking/booking.reducer";
 import errorReducer from "./error/error.reducer";
 import newsletterReducer from "./newsletter/newsletter.reducer";
+import recommendationsReducer from "./recommendations/recommendations.reducer";
 
 const persistConfig = {
   key: "root",
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
   booking: bookingReducer,
   error: errorReducer,
   newsletter: newsletterReducer,
+  recommendations: recommendationsReducer,
 });
 
 export default persistReducer(persistConfig, rootReducer);

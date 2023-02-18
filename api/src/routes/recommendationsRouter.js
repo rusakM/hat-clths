@@ -5,8 +5,15 @@ const productRankController = require("../controllers/productsRankController");
 const genderBasedRecommendationController = require("../controllers/genderBasedRecommendationController");
 const userRecomendationsProfileController = require("../controllers/userRecommendationsProfileController");
 const authController = require("../controllers/authController");
+const recommendationsController = require("../controllers/recommendationsController");
 
 const router = express.Router();
+
+router.get(
+  "/",
+  authController.tryProtect,
+  recommendationsController.selectRecommendations
+);
 
 router
   .route("/cold")

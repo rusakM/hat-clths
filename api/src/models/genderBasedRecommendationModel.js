@@ -21,10 +21,11 @@ genderBasedRecommendationSchema.pre(/^find/, function (next) {
     path: "productPreview",
     select: "_id name description price photos imageCover slug",
     options: { _recursed: true },
-  }).populate({
-    path: "category",
-    select: "_id name slug gender",
-    options: { _recursed: true },
+    populate: {
+      path: "category",
+      select: "_id name slug gender",
+      options: { _recursed: true },
+    },
   });
 
   next();

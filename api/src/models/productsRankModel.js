@@ -19,12 +19,13 @@ productsRankSchema.index({ productPreview: 1, ranksAverage: -1 });
 productsRankSchema.pre(/^find/, function (next) {
   this.populate({
     path: "productPreview",
-    select: "_id name description price photos imageCover slug",
+    select: "_id name description price photos imageCover slug category",
     options: { _recursed: true },
-  }).populate({
-    path: "category",
-    select: "_id name slug gender",
-    options: { _recursed: true },
+    populate: {
+      path: "category",
+      select: "_id name slug gender",
+      options: { _recursed: true },
+    },
   });
 
   next();

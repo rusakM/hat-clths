@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,6 +10,11 @@ import { selectOneProduct } from "../../redux/products/product.selectors";
 import { selectCurrentUser } from "../../redux/user/user.selectors";
 import { sendReviewStart } from "../../redux/products/product.actions";
 import { addItem } from "../../redux/cart/cart.actions";
+import {
+  fetchRecommendationsStart,
+  fetchGenderBasedRecommendationsStart,
+  fetchSimilarProductsStart,
+} from "../../redux/recommendations/recommendations.actions";
 
 import CustomButton from "../custom-button/custom-button.component";
 import ThumbnailsList from "../thumbnails-list/thumbnails-list.component";
@@ -17,6 +22,8 @@ import CustomSelect from "../custom-select/custom-select.component";
 import Review from "../review/review.component";
 import Stars from "../stars/stars.component";
 import Popup from "../popup/popup.component";
+import Spinner from "../spinner/spinner.component";
+import { H3Header } from "../../pages/main-page/main-page.styles";
 
 import formatPrice from "../../utils/formatPrice";
 import calculateAverageRating from "./calculateAverage";
@@ -42,7 +49,26 @@ import {
 
 import "./product-viewer.styles.css";
 
-const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
+const RecommendationsList = lazy(() =>
+  import("../recommendations-list/recommendations-list.container")
+);
+
+const GenderBasedRecommendationsList = lazy(() =>
+  import("../recommendations-list/gender-based-recommendations-list.container")
+);
+const SimilarProductsList = lazy(() =>
+  import("../recommendations-list/similar-products-list.container")
+);
+
+const ProductViewer = ({
+  product,
+  currentUser,
+  sendReview,
+  addItem,
+  fetchRecommendationsStart,
+  fetchGenderBasedRecommendationsStart,
+  fetchSimilarProductsStart,
+}) => {
   if (!product) {
     product = {};
   }
@@ -58,6 +84,7 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
     reviews,
   } = product;
 
+  console.log(category);
   let defaultPhoto = null;
   let availableSizesList = [];
 
@@ -68,6 +95,19 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
       }
     });
   }
+
+  useEffect(() => {
+    if (_id) {
+      fetchRecommendationsStart();
+      fetchSimilarProductsStart(_id);
+    }
+  }, [fetchRecommendationsStart, fetchSimilarProductsStart, _id]);
+
+  useEffect(() => {
+    if (category && category.hasOwnProperty("gender")) {
+      fetchGenderBasedRecommendationsStart(category.gender);
+    }
+  }, [category, fetchGenderBasedRecommendationsStart]);
 
   if (products && products.length > 0) {
     const sizesKeys = Object.values(PRODUCT_SIZES);
@@ -180,9 +220,17 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
           <DescriptionContainer>
             <p>{description && description}</p>
           </DescriptionContainer>
+          <H3Header>Specjalnie dla ciebie:</H3Header>
+          <Suspense fallback={<Spinner />}>
+            <RecommendationsList size={9} />
+          </Suspense>
           {productAddedStatus && (
             <Popup>
               <h2>Dodano do koszyka</h2>
+              <H3Header>Inni klienci wybrali również:</H3Header>
+              <Suspense fallback={<Spinner />}>
+                <SimilarProductsList length={5} />
+              </Suspense>
               <div
                 className="row space-around"
                 style={{
@@ -205,6 +253,11 @@ const ProductViewer = ({ product, currentUser, sendReview, addItem }) => {
           )}
         </ProductContainer>
       </ProductPageInfoContainer>
+      <H3Header>Uzupełnij look:</H3Header>
+      <Suspense fallback={<Spinner />}>
+        <GenderBasedRecommendationsList length={7} size={11.5} />
+      </Suspense>
+
       <ReviewsContainer>
         <ProductName>Opinie klientów:</ProductName>
         {reviews &&
@@ -258,6 +311,11 @@ const mapDispatchToProps = (dispatch) => ({
   sendReview: (reviewData, productId) =>
     dispatch(sendReviewStart(reviewData, productId)),
   addItem: (productData) => dispatch(addItem(productData)),
+  fetchRecommendationsStart: () => dispatch(fetchRecommendationsStart()),
+  fetchGenderBasedRecommendationsStart: (gender) =>
+    dispatch(fetchGenderBasedRecommendationsStart(gender)),
+  fetchSimilarProductsStart: (productId) =>
+    dispatch(fetchSimilarProductsStart(productId)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductViewer);
