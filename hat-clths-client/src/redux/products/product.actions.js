@@ -32,7 +32,7 @@ export const fetchOneProductFailure = (error) => ({
 
 export const fetchTopProductsStart = () => ({
   type: ProductActionTypes.FETCH_TOP_PRODUCTS_START,
-  payload: { limit: 10 },
+  payload: { limit: 15 },
 });
 
 export const fetchTopProductsSuccess = (productsMap) => ({

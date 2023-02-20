@@ -10,7 +10,7 @@ block content
                 img(src=`${url}/uploads/products/${product.imageCover}`)
                 div 
                     a(href=`${url}/products/${product.category.slug}/${product._id}`) 
-                        h3= `${product.name}`
+                        h4= `${product.name}`
                     h2= `${product.price}`
 
 
@@ -29,7 +29,7 @@ block content
                         thead
     p
     p Jeśli nie chcesz otrzymywać od nas wiadomości&nbsp;
-        a(href=`${url}/newsletter/unsubscribe/${otherProps[0]._id}`, target='_blank')
+        a(href=`${url}/newsletter/unsubscribe/${otherProps[1]}`, target='_blank')
             u wypisz się
     p
     p - Zespół Hat-Clths

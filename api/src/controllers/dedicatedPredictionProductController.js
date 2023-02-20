@@ -1,9 +1,35 @@
-const factory = require("./handlerFactory");
+const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const DedicatedPredictionProduct = require("../models/dedicatedPredictionProductModel");
+const productsRankController = require("./productsRankController");
 
-exports.getAll = factory.getAll(DedicatedPredictionProduct);
+exports.getAll = catchAsync(async (req, res, next) => {
+  if (req.user && req.user.role === "użytkownik") {
+    req.query.user = req.user.id;
+  }
+
+  const docs = new APIFeatures(DedicatedPredictionProduct.find({}), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  const recommendations = await docs.query;
+
+  if (recommendations.length === 0) {
+    req.query.sort = "ranksAverage";
+    return productsRankController.getAll(req, res, next);
+  }
+
+  res.status(200).json({
+    status: "success",
+    results: recommendations.length,
+    data: {
+      data: recommendations,
+    },
+  });
+});
+
 exports.create = catchAsync(async (req, res, next) => {
   const { recommendations } = req.body;
 

@@ -14,11 +14,10 @@ router.get(
 
 //for admin!!!
 
-router.get(
-  "/",
-  authController.protect,
-  authController.restrictTo("admin"),
-  newsletterController.getAll
-);
+router.use(authController.protect, authController.restrictTo("admin"));
+
+router.get("/", newsletterController.getAll);
+
+router.get("/send-newsletter", newsletterController.sendNewsletter);
 
 module.exports = router;

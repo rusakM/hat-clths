@@ -14,6 +14,12 @@ router.get(
 router.get("/recommendations", calculationsController.recommendations);
 
 router.get(
+  "/newsletter",
+  taskController.addImmediateTask(onDemandJobs.callNewsletter),
+  taskController.sendSuccessResponse
+);
+
+router.get(
   "/recommendationsPerform",
   taskController.addImmediateTask(onDemandJobs.callRecommendations),
   taskController.sendSuccessResponse

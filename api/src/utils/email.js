@@ -76,8 +76,13 @@ module.exports = class Email {
     );
   }
 
-  async sendNewsletter(productsList) {
-    await this.send("newsletter", "Newsletter Hat-Clths", productsList);
+  async sendNewsletter(productsList, newsletterId) {
+    await this.send(
+      "newsletter",
+      "Newsletter Hat-Clths",
+      productsList,
+      newsletterId
+    );
   }
 
   async sendNewsletterWelcome(newsletterData) {
