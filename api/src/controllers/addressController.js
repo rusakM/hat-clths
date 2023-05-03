@@ -4,6 +4,8 @@ const factory = require("./handlerFactory");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 
+exports.getAllAddresses = factory.getAll(Address);
+
 exports.getUserAddress = catchAsync(async (req, res, next) => {
   let address = await Address.find({ user: req.user.id });
 

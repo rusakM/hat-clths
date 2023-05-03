@@ -11,6 +11,13 @@ router
   .get(addressController.getUserAddress)
   .post(addressController.tryToSetAsDefault, addressController.createAddress);
 
+router.get(
+  "/allAddresses",
+  authCotroller.protect,
+  authCotroller.restrictTo("admin"),
+  addressController.getAllAddresses
+);
+
 router
   .route("/:id")
   .get(addressController.getAddress)

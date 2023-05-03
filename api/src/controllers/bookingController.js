@@ -71,7 +71,7 @@ exports.protectBooking = catchAsync(async (req, res, next) => {
 // 1) user for booking
 
 exports.userVerification = catchAsync(async (req, res, next) => {
-  const { user } = req.body;
+  const { user, rewriteUser } = req.body;
   if (!user || !user.email) {
     return next(new AppError("Brak danych o użytkowniku", 404));
   }
@@ -92,15 +92,21 @@ exports.userVerification = catchAsync(async (req, res, next) => {
       passwordConfirm: process.env.JWT_SECRET,
     });
   }
+  userFromDb = userFromDb.toObject();
+
+  if (rewriteUser && userFromDb.role === "admin") {
+    userFromDb = await User.findById(rewriteUser);
+    userFromDb = userFromDb.toObject();
+  }
+
   const accessToken = md5(`${process.env.JWT_SECRET}${userFromDb._id}`);
 
-  userFromDb = userFromDb.toObject();
   req.booking = {
     user: userFromDb._id,
   };
   req.booking.accessToken = accessToken;
   req.user = userFromDb;
-  console.log("1. user ok");
+  //console.log("1. user ok");
 
   next();
 });
@@ -163,7 +169,7 @@ exports.addressVerification = catchAsync(async (req, res, next) => {
 
   req.booking.address = addressId;
 
-  console.log("2. address ok");
+  //console.log("2. address ok");
 
   next();
 });
@@ -175,7 +181,7 @@ exports.invoiceValidation = catchAsync(async (req, res, next) => {
   const { user } = req.booking;
 
   if (!isWithInvoice) {
-    console.log("3. invoice ok");
+    //console.log("3. invoice ok");
     return next();
   }
 
@@ -214,7 +220,7 @@ exports.invoiceValidation = catchAsync(async (req, res, next) => {
 
   req.booking.invoice = invoiceFromDb._id;
 
-  console.log("3. invoice ok");
+  //console.log("3. invoice ok");
 
   next();
 });
@@ -265,7 +271,7 @@ exports.createBooking = catchAsync(async (req, res, next) => {
 
   req.newBooking = newBooking.toObject();
 
-  console.log("4. booking ok");
+  //console.log("4. booking ok");
 
   next();
 });
@@ -293,7 +299,7 @@ exports.buyProducts = catchAsync(async (req, res, next) => {
     }
   );
 
-  console.log("5. products ok");
+  //console.log("5. products ok");
 
   next();
 });
